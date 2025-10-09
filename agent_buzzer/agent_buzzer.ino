@@ -1,6 +1,8 @@
 #include <Wire.h>
 #include <SimpleMap.h>
 
+int I2C_SELF_ADDRESS = 0x11;
+
 int myIndexes[2] = {1, 2};
 
 const int buzz_1 = 9;
@@ -31,7 +33,8 @@ void setup() {
   Serial.begin(9600);
 
   // I2C
-  Wire.begin(0x11);
+  TWAR = (I2C_SELF_ADDRESS << 1) | 1;  // enable broadcasts to be received
+  Wire.begin(I2C_SELF_ADDRESS);
   Wire.onReceive(receiveIndex);
 
   // Buttons
