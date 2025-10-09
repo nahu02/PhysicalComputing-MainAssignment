@@ -18,7 +18,7 @@ const int GLOBAL_INDEXES[] = {1, 2, 3, 4};
 const int NUM_GLOBAL_INDEXES = 4;
 
 // I2C agent addresses
-const int I2C_AGENTS[] = {0x11, 0x12};
+const int I2C_AGENTS[] = {0x11, 0x10};
 const int NUM_AGENTS = 2;
 
 // Game state
@@ -28,7 +28,7 @@ int currentPhase = 0;  // 0=setup, 1=phase1, 2=phase2, 3=phase3
 int patternIndex = 0;  // Current position in pattern during phase 2
 
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(115200);
   while (!Serial) {
     delay(50); // Wait for serial port to connect
   }
