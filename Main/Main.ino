@@ -3,15 +3,16 @@
 #include <Wire.h>
 
 // Configuration
-const int ACTUATOR_ACTIVE_LENGTH_MS = 500;
-const int INTER_ELEMENT_DELAY_MS = 300;
+const int ACTUATOR_ACTIVE_LENGTH_MS = 1500;
+const int INTER_ELEMENT_DELAY_MS = 500;
 const int PHASE_TRANSITION_DELAY_MS = 100;
-const int I2C_BROADCAST_ADDR = 0x00;
+const int PATTERN_LENGTH_MIN = 3;
+const int PATTERN_LENGTH_MAX = 6;
 
 // I2C Protocol Messages
-const byte MSG_STOP = 0x00;
-const byte MSG_PHASE1 = 0xF1;
-const byte MSG_PHASE2 = 0xF2;
+const uint8_t MSG_STOP = 0x00;
+const uint8_t MSG_PHASE1 = 0xF1;
+const uint8_t MSG_PHASE2 = 0xF2;
 
 // Global indexes that exist (actuator/button pairs)
 const int GLOBAL_INDEXES[] = {1, 2, 3, 4};
@@ -19,13 +20,12 @@ const int NUM_GLOBAL_INDEXES = 4;
 
 // I2C agent addresses
 const int I2C_AGENTS[] = {0x11, 0x10};
-const int NUM_AGENTS = 2;
 
 // Game state
-int activePattern[6];  // Max pattern length is 6
-int patternLength = 0;
-int currentPhase = 0;  // 0=setup, 1=phase1, 2=phase2, 3=phase3
-int patternIndex = 0;  // Current position in pattern during phase 2
+uint8_t activePattern[PATTERN_LENGTH_MAX];
+int patternLength;
+int currentPhase;  // 0=setup, 1=phase1, 2=phase2, 3=phase3
+int patternIndex;  // Current position in pattern during phase 2
 
 void setup() {
   Serial.begin(115200);
@@ -39,6 +39,22 @@ void setup() {
   // Initialize I2C as main
   Wire.begin();
   Serial.println("I2C initialized as main");
+  
+  // TODO: remove debug
+  // Check that all I2C agents are reachable
+  for (auto agent : I2C_AGENTS) {
+    Wire.beginTransmission(agent);
+    uint8_t error = Wire.endTransmission();
+    if (error == 0) {
+      Serial.print("I2C agent 0x");
+      Serial.print(agent, HEX);
+      Serial.println(" is reachable");
+    } else {
+      Serial.print("I2C agent 0x");
+      Serial.print(agent, HEX);
+      Serial.println(" is NOT reachable");
+    }
+  }
   
   // Generate random pattern
   generatePattern();
@@ -64,14 +80,18 @@ void loop() {
     currentPhase = 4; // Done
   }
   else {
-    // Game finished, do nothing
+    // Game finished, restart after delay
+    delay(5000);
+    currentPhase = 0;
+    generatePattern();
     delay(1000);
+    currentPhase = 1;
   }
 }
 
 // Generate random pattern of length 3-6
 void generatePattern() {
-  patternLength = random(3, 7); // Random between 3 and 6 inclusive
+  patternLength = random(PATTERN_LENGTH_MIN, PATTERN_LENGTH_MAX + 1);
   
   Serial.print("Generated pattern of length ");
   Serial.print(patternLength);
@@ -86,8 +106,8 @@ void generatePattern() {
 }
 
 // Broadcast a single byte to all agents
-void broadcastByte(byte data) {
-  Wire.beginTransmission(I2C_BROADCAST_ADDR);
+void broadcastByte(uint8_t data) {
+  Wire.beginTransmission(0);  // Broadcast address
   Wire.write(data);
   Wire.endTransmission();
 }
@@ -103,13 +123,13 @@ void executePhase1() {
   
   // Send each pattern element
   for (int i = 0; i < patternLength; i++) {
-    // Send the global index as a byte (0x01, 0x02, 0x03, 0x04)
-    byte indexByte = (byte)activePattern[i];
+    uint8_t indexByte = (uint8_t)activePattern[i];
     broadcastByte(indexByte);
-    Serial.print("Sent: 0x0");
-    Serial.print(activePattern[i]);
+    Serial.print("Sent: 0x");
+    Serial.print(activePattern[i] < 16 ? "0" : "");
+    Serial.print(activePattern[i], HEX);
     Serial.print(" (Activate index ");
-    Serial.print(activePattern[i]);
+    Serial.print(activePattern[i], DEC);
     Serial.println(")");
     
     // Wait for actuator to be active
@@ -147,14 +167,12 @@ void executePhase2() {
   // Poll agents until pattern is complete or fails
   while (!patternComplete && !patternFailed) {
     // Poll each agent
-    for (int i = 0; i < NUM_AGENTS; i++) {
-      int agentAddr = I2C_AGENTS[i];
-      
-      // Request 1 byte from agent
+    for (auto agentAddr : I2C_AGENTS) {
+      // Request 1 uint8_t from agent
       int bytesReceived = Wire.requestFrom(agentAddr, 1);
       
       if (bytesReceived > 0) {
-        byte receivedByte = Wire.read();
+        uint8_t receivedByte = Wire.read();
         
         // Check if agent reported a button press (non-zero value)
         if (receivedByte > 0x00 && receivedByte <= 0x0F) {  // Valid button press (1-15)
