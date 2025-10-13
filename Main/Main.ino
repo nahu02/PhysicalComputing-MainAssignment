@@ -40,22 +40,27 @@ void setup() {
   Wire.begin();
   Serial.println("I2C initialized as main");
   
-  // TODO: remove debug
   // Check that all I2C agents are reachable
-  for (auto agent : I2C_AGENTS) {
-    Wire.beginTransmission(agent);
-    uint8_t error = Wire.endTransmission();
-    if (error == 0) {
-      Serial.print("I2C agent 0x");
-      Serial.print(agent, HEX);
-      Serial.println(" is reachable");
-    } else {
-      Serial.print("I2C agent 0x");
-      Serial.print(agent, HEX);
-      Serial.println(" is NOT reachable");
+  bool errorPresent;
+  do {
+    errorPresent = false;
+    for (auto agent : I2C_AGENTS) {
+      Wire.beginTransmission(agent);
+      uint8_t error = Wire.endTransmission();
+      if (error == 0) {
+        Serial.print("I2C agent 0x");
+        Serial.print(agent, HEX);
+        Serial.println(" is reachable");
+      } else {
+        errorPresent = true;
+        Serial.print("I2C agent 0x");
+        Serial.print(agent, HEX);
+        Serial.println(" is NOT reachable");
+      }
     }
-  }
-  
+    delay(500);
+  } while (errorPresent);
+
   // Generate random pattern
   generatePattern();
   
