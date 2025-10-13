@@ -9,10 +9,11 @@ struct ActuSensorator {
     uint8_t id; // Global index of the actuator
     int actuatorPin;
     int buttonPin;
+    int lastBtnState; // Tracking for edge detection
 };
 
 // Actuator/button pairs this agent controls
-const ActuSensorator nodes[2] = {
+ActuSensorator nodes[2] = {
   {0x01, 9, 2},  // Actuator 0x01 on pin 9, button on pin 2
   {0x02, 10, 3}  // Actuator 0x02 on pin 10, button on pin 3
 };
@@ -74,12 +75,14 @@ void loop() {
 
   // Phase 2: Read button states
   if (!isPhase1) {
-    for (auto node : nodes) {
+    for (auto& node : nodes) {
       int buttonState = digitalRead(node.buttonPin);
-      if (buttonState == HIGH) {
+      // Edge detection: only trigger on button press
+      if (buttonState == HIGH && node.lastBtnState == LOW) {
         mostRecentButtonPress = node.id;
         delay(50);
       }
+      node.lastBtnState = buttonState;
     }
   }
 }
