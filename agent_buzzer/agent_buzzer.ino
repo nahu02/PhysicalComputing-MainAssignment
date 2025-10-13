@@ -1,50 +1,39 @@
 #include <Wire.h>
 
 
-int I2C_SELF_ADDRESS = 0x11;
+const uint8_t I2C_SELF_ADDRESS = 0x11;
 
-int myIndexes[2] = {1, 2};
-
-const int btn_1 = 2;
-const int btn_2 = 3;
-
-bool onPhase1 = true;
-
-struct Actuator {
+// Actuator/button pair data structure
+struct ActuSensorator {
   public:
-    int id;
-    int pin;
+    uint8_t id; // Global index of the actuator
+    int actuatorPin;
+    int buttonPin;
 };
 
+// Actuator/button pairs this agent controls
+const ActuSensorator nodes[2] = {
+  {0x01, 9, 2},  // Actuator 0x01 on pin 9, button on pin 2
+  {0x02, 10, 3}  // Actuator 0x02 on pin 10, button on pin 3
+};
 
-
-Actuator actuators[2];
-
-int directive;
-int stateBtn_1 = 0;
-int stateBtn_2 = 0;
+bool isPhase1 = true;
+uint8_t directive;
+uint8_t mostRecentButtonPress = 0x00;
 
 void setup() {
-
-  Serial.begin(9600);
-
   // I2C
-  TWAR = (I2C_SELF_ADDRESS << 1) | 1;  // enable broadcasts to be received
   Wire.begin(I2C_SELF_ADDRESS);
+  TWAR = (I2C_SELF_ADDRESS << 1) | 1;  // enable broadcasts to be received
   Wire.onReceive(receiveIndex);
+  Wire.onRequest(sendButtonPress);
 
-  // Buttons
-  pinMode(btn_1, INPUT);
-  pinMode(btn_2, INPUT);
-
-  Actuator ACTUATOR1, ACTUATOR2;
-  ACTUATOR1.id = 1;
-  ACTUATOR2.id = 2;
-  ACTUATOR1.pin = 9;
-  ACTUATOR2.pin = 10;
-
-  actuators[0] = ACTUATOR1;
-  actuators[1] = ACTUATOR2;
+  // Pins
+  for (auto node : nodes) {
+    pinMode(node.buttonPin, INPUT);
+    pinMode(node.actuatorPin, OUTPUT);
+    digitalWrite(node.actuatorPin, LOW);
+  }
 }
 
 
@@ -52,21 +41,23 @@ void receiveIndex(int bytes) {
   directive = Wire.read();
   switch (directive) {
     case 0xF1:
-      onPhase1 = true;
+      isPhase1 = true;
+      mostRecentButtonPress = 0x00;
       break;
     case 0xF2:
-      onPhase1 = false;
+      isPhase1 = false;
+      mostRecentButtonPress = 0x00;
       break;
     case 0x00:
-      for (auto act : actuators) {
-        digitalWrite(act.pin, LOW);
+      for (auto node : nodes) {
+        digitalWrite(node.actuatorPin, LOW);
       }
       break;
     default:
-      if (onPhase1) {
-        for (auto act : actuators) {
-          if (act.id == directive) {
-            digitalWrite(act.pin, HIGH);
+      if (isPhase1) {
+        for (auto node : nodes) {
+          if (node.id == directive) {
+            digitalWrite(node.actuatorPin, HIGH);
           }
         }
       }
@@ -74,12 +65,22 @@ void receiveIndex(int bytes) {
   }
 }
 
+void sendButtonPress() {
+  Wire.write((byte)mostRecentButtonPress);
+  mostRecentButtonPress = 0x00;
+}
+
 void loop() {
 
-  while (!onPhase1) {
-    stateBtn_1 = digitalRead(btn_1);
-    stateBtn_2 = digitalRead(btn_2);
-    // @TODO logic for mapping btn pressed and sending it to the controller
+  // Phase 2: Read button states
+  if (!isPhase1) {
+    for (auto node : nodes) {
+      int buttonState = digitalRead(node.buttonPin);
+      if (buttonState == HIGH) {
+        mostRecentButtonPress = node.id;
+        delay(50);
+      }
+    }
   }
 }
 
