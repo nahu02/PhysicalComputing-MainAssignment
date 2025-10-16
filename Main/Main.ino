@@ -30,6 +30,9 @@ int currentPhase;  // 0=setup, 1=phase1, 2=phase2, 3=phase3
 int patternIndex;  // Current position in pattern during phase 2
 
 void setup() {
+  pinMode(FAILURE_INDICATOR_LED, OUTPUT);
+  pinMode(SUCCESS_INDICATOR_LED, OUTPUT);
+
   Serial.begin(115200);
   while (!Serial) {
     delay(50); // Wait for serial port to connect
