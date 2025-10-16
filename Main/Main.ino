@@ -8,6 +8,8 @@ const int INTER_ELEMENT_DELAY_MS = 500;
 const int PHASE_TRANSITION_DELAY_MS = 100;
 const int PATTERN_LENGTH_MIN = 3;
 const int PATTERN_LENGTH_MAX = 6;
+const int SUCCESS_INDICATOR_LED = 1;
+const int FAILURE_INDICATOR_LED = 0;
 
 // I2C Protocol Messages
 const uint8_t MSG_STOP = 0x00;
@@ -228,14 +230,23 @@ void executePhase3() {
   if (patternIndex >= patternLength) {
     Serial.println("!!!!!! WIN !!!!!!");
     Serial.println("All pattern elements matched correctly!");
+    blink_led(SUCCESS_INDICATOR_LED);
   } else {
     Serial.println("XXXXXX LOSE XXXXXX");
     Serial.print("Pattern failed at position ");
     Serial.print(patternIndex + 1);
     Serial.print(" of ");
     Serial.println(patternLength);
+    blink_led(FAILURE_INDICATOR_LED);
   }
   
   Serial.println("\nGame Over");
   Serial.println("============================");
+}
+
+void blink_led(int pin) {
+    digitalWrite(pin, HIGH);
+    delay(500);
+    digitalWrite(pin, LOW);
+    delay(500);
 }
