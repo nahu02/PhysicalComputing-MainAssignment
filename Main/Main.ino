@@ -245,8 +245,10 @@ void executePhase3() {
 }
 
 void blink_led(int pin) {
+    for (int i = 0; i < 5; i++) {
     digitalWrite(pin, HIGH);
     delay(500);
     digitalWrite(pin, LOW);
     delay(500);
+    }
 }
