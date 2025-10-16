@@ -8,8 +8,8 @@ const int INTER_ELEMENT_DELAY_MS = 500;
 const int PHASE_TRANSITION_DELAY_MS = 100;
 const int PATTERN_LENGTH_MIN = 3;
 const int PATTERN_LENGTH_MAX = 6;
-const int SUCCESS_INDICATOR_LED = 1;
-const int FAILURE_INDICATOR_LED = 0;
+const int SUCCESS_INDICATOR_LED = 0;
+const int FAILURE_INDICATOR_LED = 1;
 
 // I2C Protocol Messages
 const uint8_t MSG_STOP = 0x00;
