@@ -55,8 +55,9 @@
 
 \section{Circuit Diagram}
 Our circuit diagram was drawn in Eagle from Fusion 360 with the use of custom component piece for ESP32.
-
-
+Prototype features a Main (Master) with two Agents (Slaves) setup communicating through I2C. Main is an ESP32 C3 mini micro-controller, selected for this task due to its possession of a module for random number generation, necessary for creating unique sequences.
+Each Agent is an ATmega328P, both having identical functionality, apart from the actuators controlled by them; one manages LEDs and the other one buzzing disc motors.
+Power supply section uses both a step-up and a step-down converter due to the demand for both 3.3 and 5 voltages for the buzzing motors circuit and everything else respectively.
 
 \subsection{Color Coding}
 
@@ -126,6 +127,12 @@ R := \frac{(V_{supply}) - (V_{BE\_sat})}{I_B} = 540.00000000 \Omega \\
 \section{Breadboard Prototype}
 
 \noindent Breadboard prototype for the main setup is shown in figure \ref{fig:main_agents_breadboard} and the power supply for LiPo battery and its voltage conversion in figure \ref{fig:power_supply_breadboard}.
+
+In order to avoid duplication at this stage of the work, the prototype features only one Main-Agent setup, which will be doubled for the final product in order to make the game competitive for two players; each having their own station.
+For the same reason, there are currently only 2 LEDs and 2 buzzing motors per set, which will be increased to 4 each.
+Directions and feedback will be given with voice commands. For the time being, red/green LEDs indicate the failure/success per level, as it is a single player version.
+Additional feature that is planned for the final version of the project is to embed both types of actuators on top of the button caps, to streamline the user-input and make it as intuitive as possible, given the sequence output. Player will be able to hold one hand with fingertips resting comfortably on top of the buttons to receive the haptic signals, while observing the LED module simultaneously and quickly repeat the series of events.
+
 
 \begin{figure*}[!htb]
   \centering
