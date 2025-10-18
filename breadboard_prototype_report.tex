@@ -43,7 +43,7 @@
 \maketitle	
 \section{Toy concept}
 
-\noindent Our interactive toy concept is based on a popular game called \textit{Simon Says}, where users have to input a sequence of colored buttons provided with voice commands. We extend the original idea by providing the sequences in both visual (lighting LEDs) and haptic (buzzing disc motors) manner.
+\noindent Our interactive toy concept is based on a popular game called \textit{Simon Says}, where users have to repeat a sequence of flashing colored buttons. We extend the original idea by providing the sequences in both visual (lighting LEDs) and haptic (buzzing disc motors) manner.
 
 
 \noindent Target user group of our project is anyone interested in improving their concentration and short-term memory through tactile and visual means, but due to the high level of interactivity and the competitive nature of the game it might be particularly appealing for children (age group 10-13).
@@ -128,10 +128,11 @@ R := \frac{(V_{supply}) - (V_{BE\_sat})}{I_B} = 540.00000000 \Omega \\
 
 \noindent Breadboard prototype for the main setup is shown in figure \ref{fig:main_agents_breadboard} and the power supply for LiPo battery and its voltage conversion in figure \ref{fig:power_supply_breadboard}.
 
-In order to avoid duplication at this stage of the work, the prototype features only one Main-Agent setup, which will be doubled for the final product in order to make the game competitive for two players; each having their own station.
+\noindent In order to avoid duplication at this stage of the work, the prototype features only one Main-Agent setup, which will be doubled for the final product in order to make the game competitive for two players; each having their own station.
 For the same reason, there are currently only 2 LEDs and 2 buzzing motors per set, which will be increased to 4 each.
-Directions and feedback will be given with voice commands. For the time being, red/green LEDs indicate the failure/success per level, as it is a single player version.
-Additional feature that is planned for the final version of the project is to embed both types of actuators on top of the button caps, to streamline the user-input and make it as intuitive as possible, given the sequence output. Player will be able to hold one hand with fingertips resting comfortably on top of the buttons to receive the haptic signals, while observing the LED module simultaneously and quickly repeat the series of events.
+
+\noindent For the time being, red/green LEDs indicate the failure/success per level, but we think of adding something more multimodal if time allows, potentially including sound.
+\noindent Another additional feature that is planned for the final version of the project is to embed both types of actuators on top of the button caps, to streamline the user-input and make it as intuitive as possible, given the sequence output. Player will be able to hold one hand with fingertips resting comfortably on top of the buttons to receive the haptic signals, while observing the LED module simultaneously and quickly repeat the series of events.
 
 
 \begin{figure*}[!htb]
