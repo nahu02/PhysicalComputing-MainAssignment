@@ -17,8 +17,8 @@ const uint8_t MSG_PHASE1 = 0xF1;
 const uint8_t MSG_PHASE2 = 0xF2;
 
 // Global indexes that exist (actuator/button pairs)
-const int GLOBAL_INDEXES[] = {1, 2, 3, 4};
-const int NUM_GLOBAL_INDEXES = 4;
+const int GLOBAL_INDEXES[] = {1, 2, 3, 4, 5, 6, 7, 8};
+const int NUM_GLOBAL_INDEXES = 8;
 
 // I2C agent addresses
 const int I2C_AGENTS[] = {0x11, 0x10};
