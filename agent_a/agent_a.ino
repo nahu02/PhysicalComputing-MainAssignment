@@ -3,8 +3,8 @@
 
 const uint8_t I2C_SELF_ADDRESS = 0x10;
 
-int redPin = 2; // physical 25
-int greenPin = 3; // physical 26
+int redPin = A2; // physical 25
+int greenPin = A3; // physical 26
 
 // Actuator/button pair data structure
 struct ActuSensorator {
