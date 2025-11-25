@@ -15,13 +15,19 @@ const int FAILURE_INDICATOR_LED = 1;
 const uint8_t MSG_STOP = 0x00;
 const uint8_t MSG_PHASE1 = 0xF1;
 const uint8_t MSG_PHASE2 = 0xF2;
+const uint8_t MSG_PHASE3 = 0xF3;
+const uint8_t MSG_SUCCESS = 0xFF;
+const uint8_t MSG_FAILURE = 0xFE;
 
 // Global indexes that exist (actuator/button pairs)
-const int GLOBAL_INDEXES[] = {1, 2, 3, 4, 5, 6, 7, 8};
-const int NUM_GLOBAL_INDEXES = 8;
+// const int GLOBAL_INDEXES[] = {1, 2, 3, 4, 5, 6, 7, 8};
+const int GLOBAL_INDEXES[] = {1, 2, 3, 4};
+// const int NUM_GLOBAL_INDEXES = 8;
+const int NUM_GLOBAL_INDEXES = 4;
 
 // I2C agent addresses
-const int I2C_AGENTS[] = {0x11, 0x10};
+// const int I2C_AGENTS[] = {0x11, 0x10};
+const int I2C_AGENTS[] = {0x10};
 
 // Game state
 uint8_t activePattern[PATTERN_LENGTH_MAX];
@@ -108,7 +114,8 @@ void generatePattern() {
   Serial.print(": ");
   
   for (int i = 0; i < patternLength; i++) {
-    activePattern[i] = GLOBAL_INDEXES[random(0, NUM_GLOBAL_INDEXES)];
+    // activePattern[i] = GLOBAL_INDEXES[random(0, NUM_GLOBAL_INDEXES)];
+    activePattern[i] = GLOBAL_INDEXES[i];
     Serial.print(activePattern[i]);
     if (i < patternLength - 1) Serial.print(", ");
   }
@@ -229,18 +236,25 @@ void executePhase2() {
 // Phase 3: Report results
 void executePhase3() {
   Serial.println("\n=== PHASE 3: Results ===");
-  
+
+  // announce phase 3 to agent
+    broadcastByte(MSG_PHASE3);
+
   if (patternIndex >= patternLength) {
     Serial.println("!!!!!! WIN !!!!!!");
     Serial.println("All pattern elements matched correctly!");
-    blink_led(SUCCESS_INDICATOR_LED);
+    // emit success code
+    broadcastByte(MSG_SUCCESS);
+    // blink_led(SUCCESS_INDICATOR_LED);
   } else {
     Serial.println("XXXXXX LOSE XXXXXX");
     Serial.print("Pattern failed at position ");
     Serial.print(patternIndex + 1);
     Serial.print(" of ");
     Serial.println(patternLength);
-    blink_led(FAILURE_INDICATOR_LED);
+    // emit failure code
+    broadcastByte(MSG_FAILURE);
+    // blink_led(FAILURE_INDICATOR_LED);
   }
   
   Serial.println("\nGame Over");

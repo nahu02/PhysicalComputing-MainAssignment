@@ -3,6 +3,9 @@
 
 const uint8_t I2C_SELF_ADDRESS = 0x10;
 
+int redPin = 2; // physical 25
+int greenPin = 3; // physical 26
+
 // Actuator/button pair data structure
 struct ActuSensorator {
   public:
@@ -14,13 +17,14 @@ struct ActuSensorator {
 
 // Actuator/button pairs this agent controls
 ActuSensorator nodes[4] = {
-  {0x01, 5, 6},  // Actuator 0x01 on digi pin 5, button on pin 6
-  {0x02, 7, 8},  // Actuator 0x02 on digi pin 7, button on pin 8
-  {0x03, 9, 10}, // Actuator 0x03 on digi pin 9, button on pin 10
-  {0x04, 11, 12} // Actuator 0x03 on digi pin 11, button on pin 12 
+  {0x01, 10, 5},  // Actuator 0x01 on digi pin 5, button on pin 6
+  {0x02, 11, 6},  // Actuator 0x02 on digi pin 7, button on pin 8
+  {0x03, 12, 7}, // Actuator 0x03 on digi pin 9, button on pin 10
+  {0x04, 13, 8} // Actuator 0x03 on digi pin 11, button on pin 12 
 };
 
 bool isPhase1 = true;
+bool isPhase2 = false;
 uint8_t directive;
 uint8_t mostRecentButtonPress = 0x00;
 
@@ -37,8 +41,28 @@ void setup() {
     pinMode(node.actuatorPin, OUTPUT);
     digitalWrite(node.actuatorPin, LOW);
   }
+  // status indicator rgb led
+  pinMode(redPin, OUTPUT);
+  pinMode(greenPin, OUTPUT);
 }
 
+void blinkStatus(int status) {
+  int statusPin;
+  if (status == 0) {
+    statusPin = redPin;
+  }
+  else {
+    statusPin = greenPin;
+  }
+
+  // blink
+  for (int i = 0; i < 5; i++) {
+    analogWrite(statusPin, 255);
+    delay(500);
+    analogWrite(statusPin, 0);
+    delay(500);
+  }
+}
 
 void receiveIndex(int bytes) {
   directive = Wire.read();
@@ -51,6 +75,17 @@ void receiveIndex(int bytes) {
       isPhase1 = false;
       mostRecentButtonPress = 0x00;
       break;
+    case 0xF3:
+      isPhase1 = false;
+      mostRecentButtonPress = 0x00;
+    case 0xFF:
+      isPhase1 = false;
+      mostRecentButtonPress = 0x00;
+      blinkStatus(1);
+    case 0xFE:
+      isPhase1 = false;
+      mostRecentButtonPress = 0x00;
+      blinkStatus(0);
     case 0x00:
       for (auto node : nodes) {
         digitalWrite(node.actuatorPin, LOW);
