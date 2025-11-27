@@ -42,6 +42,9 @@ void loop() {
   // Phase 2: Read button states
   if (!isPhase1) {
     for (auto& node : nodes) {
+      if (node.buttonPin == -1)
+        continue;
+
       int buttonState = digitalRead(node.buttonPin);
       // Edge detection: only trigger on button press
       if (buttonState == HIGH && node.lastBtnState == LOW) {
