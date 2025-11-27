@@ -14,11 +14,14 @@ struct ActuSensorator {
 
 // Actuator/button pairs this agent controls
 ActuSensorator nodes[4] = {
-  {0x01, 5, 6},  // Actuator 0x01 on digi pin 5, button on pin 6
-  {0x02, 7, 8},  // Actuator 0x02 on digi pin 7, button on pin 8
-  {0x03, 9, 10}, // Actuator 0x03 on digi pin 9, button on pin 10
-  {0x04, 11, 12} // Actuator 0x03 on digi pin 11, button on pin 12 
+  {0x01, 10, 5},  // Actuator 0x01 on digi pin 10, button on pin 5
+  {0x02, 11, 6},  // Actuator 0x02 on digi pin 11, button on pin 6
+  {0x03, 12, 7},  // Actuator 0x03 on digi pin 12, button on pin 7
+  {0x04, 13, 8}   // Actuator 0x04 on digi pin 13, button on pin 8
 };
+
+// red A2
+// green A3
 
 bool isPhase1 = true;
 uint8_t directive;
