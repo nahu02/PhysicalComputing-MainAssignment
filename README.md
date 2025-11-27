@@ -2,6 +2,26 @@
 
 The communication uses I2C with one ESP32 as the main, and ATMEGA32s as agents.
 
+## Setup
+
+### Creating Hardlinks for Shared Header
+
+The Arduino IDE doesn't handle shared includes properly across multiple sketches, so you need to create hardlinks to `shared/shared.h` in each agent directory.
+
+**Windows (PowerShell):**
+```powershell
+New-Item -ItemType HardLink -Path "agent_a\shared.h" -Target "shared\shared.h"
+New-Item -ItemType HardLink -Path "agent_b\shared.h" -Target "shared\shared.h"
+```
+
+**Linux/macOS:**
+```bash
+ln shared/shared.h agent_a/shared.h
+ln shared/shared.h agent_b/shared.h
+```
+
+This creates hardlinks (not copies) so any edits to `shared/shared.h` are immediately reflected in all agent directories.
+
 ## Main (ESP32 C3)
 
 The main acts as the game master, coordinating the game through I2C broadcast messages.
