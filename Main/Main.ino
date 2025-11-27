@@ -17,8 +17,14 @@ const uint8_t MSG_PHASE1 = 0xF1;
 const uint8_t MSG_PHASE2 = 0xF2;
 
 // Global indexes that exist (actuator/button pairs)
-const int GLOBAL_INDEXES[] = {1, 2, 3, 4, 5, 6, 7, 8};
+const int GLOBAL_INDEXES[] = {1, 2, 3, 4, 7, 8, 9, 10};
 const int NUM_GLOBAL_INDEXES = 8;
+
+// Global indexes for status LEDs
+const uint8_t AGENT_A_RED = 0x05;
+const uint8_t AGENT_A_GREEN = 0x06;
+const uint8_t AGENT_B_RED = 0x0B;
+const uint8_t AGENT_B_GREEN = 0x0C;
 
 // I2C agent addresses
 const int I2C_AGENTS[] = {0x11, 0x10};
@@ -122,6 +128,24 @@ void broadcastByte(uint8_t data) {
   Wire.endTransmission();
 }
 
+// Give a positive feedback blink
+void positiveFeedbackBlink(bool isA, int durationMs) {
+  uint8_t greenLED = isA ? AGENT_A_GREEN : AGENT_B_GREEN;
+  
+  broadcastByte(greenLED);
+  delay(durationMs);
+  broadcastByte(0x00);
+}
+
+// Give a negative feedback blink
+void negativeFeedbackBlink(bool isA, int durationMs) {
+  uint8_t redLED = isA ? AGENT_A_RED : AGENT_B_RED;
+  
+  broadcastByte(redLED);
+  delay(durationMs);
+  broadcastByte(0x00);
+}
+
 // Phase 1: Broadcast the pattern
 void executePhase1() {
   Serial.println("\n=== PHASE 1: Broadcasting Pattern ===");
@@ -195,12 +219,18 @@ void executePhase2() {
           Serial.print(" (index ");
           Serial.print(receivedIndex);
           Serial.println(")");
+
+          bool isAgentA = (agentAddr == I2C_AGENTS[0]);
           
           // Compare against expected pattern
           if (receivedIndex == activePattern[patternIndex]) {
             Serial.print("  Correct! (Expected ");
             Serial.print(activePattern[patternIndex]);
             Serial.println(")");
+
+            // Positive feedback blink
+            positiveFeedbackBlink(isAgentA, 50);
+
             patternIndex++;
             
             // Check if pattern is complete
@@ -208,11 +238,24 @@ void executePhase2() {
               patternComplete = true;
               break;
             }
+
+            positiveFeedbackBlink(isAgentA, 300);
+            delay(300);
+            positiveFeedbackBlink(isAgentA, 300);
+            delay(300);
+            positiveFeedbackBlink(isAgentA, 300);
           } else {
             Serial.print("  Wrong! (Expected ");
             Serial.print(activePattern[patternIndex]);
             Serial.println(")");
             patternFailed = true;
+
+            // Negative feedback blink
+            negativeFeedbackBlink(isAgentA, 1000);
+
+            // Other agent does positive feedback blink
+            positiveFeedbackBlink(!isAgentA, 1000);
+
             break;
           }
         }
