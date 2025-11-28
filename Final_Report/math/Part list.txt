@@ -1,5 +1,5 @@
 Battery:
-ecksteinimg.de/Datasheet/ZB07002/LP503562 1200mAH 3.7V 1S1P A0.pdf
+https://eemb.oss-accelerate.aliyuncs.com//uploads/20230315/28f8e7468414d2b421c8660279f01e45.pdf
 
 ESP 32:
 https://dl.artronshop.co.th/ESP32-C3%20SuperMini%20datasheet.pdf

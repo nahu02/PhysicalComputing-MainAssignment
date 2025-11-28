@@ -71,22 +71,15 @@
 XXXXXX
 %%In the introduction, provide a more comprehensive context for your prototype. Explain the background, real-world relevance, and motivation for undertaking this project. Clearly define the problem or challenge that your prototype addresses. Emphasize why this problem is worth solving and how your prototype contributes to solving it. Outline the specific objectives and goals your prototype aims to achieve.
 
-
-
-\section{Related Works}
-%In the related work section, delve deeper into the existing literature and projects that are relevant to your prototype. Analyze how prior research or projects have approached similar challenges and where they may have succeeded or fallen short. Highlight the uniqueness of your approach and discuss how your prototype either complements or innovates upon previous work.
-XXXXXX \cite{djajadiningrat2004tangible}
-
-
 \section{Prototype Design}
 %In the design section, provide a detailed description of your prototype's architecture and components. Include detailed schematics, diagrams, or flowcharts to illustrate the design. Explain the rationale behind your design choices, including the selection of specific sensors, actuators, and microcontrollers. Describe the user interface and interaction model if applicable. Clarify how the design aligns with your project's objectives.
 XXXXXX
 
 
-\section{Main Components}
+\section{Main Components} %% I really don't know if this is a good name? Maybe ask on Tuesday.
 %This section could provide a step-by-step account of how you constructed the prototype. Describe the hardware assembly process, wiring, and connections in detail. Include code snippets and explain the logic and functionality of your software, emphasizing any unique algorithms or coding decisions. Discuss any challenges encountered during the implementation, technical problems faced, and how you overcame them. This section should provide readers with a clear guide on how to replicate your prototype.
 
-The prototype is split into two power rails. One of these is solely for the vibration motors, which work in a, relatively,
+The prototype is split into two power rails. One of these is solely for the vibration motors, which operate properly in a relatively
 narrow voltage range. In addition to this, we also have a separate power source\footnote{LiPo battery} for the motors, to avoid electrical interference,
 which could negatively impact the microcontrollers.
 
@@ -96,15 +89,14 @@ This means our power rails are, respectively, 3.4 volts\footnote{See operating v
 and 3.7 volts\footnote{Actually a voltage range since it's connected directly to the battery.}. 
 %% Maybe Add this later? 
 %% Below is an overview of the electrical characteristics of the components included, but they will be further explained in their own subsection.
+\subsection{Components}
+\subsubsection{LiPo battery}\label{sec_lipo}
+As mentioned, we use two LiPo batteries each of which has a capacity of 820 mAh~\cite[][p.1]{lipodatasheet}. They have an operating voltage range between 2.75 and 
+4.2V~\cite[][p.3]{lipodatasheet}, at respectively fully discharged and charged states. They are also very reliable and safe~\cite[][p.4-6]{lipodatasheet}, which makes them well suited for a toy.
 
-\subsection{LiPo battery}
-As mentioned, we use two LiPo batteries each of which has a capacity of 1200 mA-hours. They have an operating voltage range between 3.0 and 4.2 volts, at respectively 
-fully discharged and charged states. Charge time for a completely drained battery is about four hours (TODO: ADD REFERENCE). They are also very reliable and safe, 
-passing all manufacturer safety tests without fire or explosion. This makes them well suited for a toy.
-
-\subsection{ATmega328P}
+\subsubsection{ATmega328P}
 The ATmega328P is used in our two agent boards, and control the actuators of the game. They also send information about button presses back to the controller upon request.
-We make use of eight of their I/O pins directly for the buttons and actuators, and we also make use of their I\textsuperscript{2}C capabilities to communicate with the
+We make use of eight of their I/O pins directly for the buttons and actuators, and we also make use of their I\textsuperscript{2}C~\cite[][p.173]{atmega328p} capabilities to communicate with the
 controller board. These work in a wide voltage range and have a fairly low power draw. 
 
 Due to the simplicity of what we're using them for, and the reduced power draw, we've decided against running these at 16MHz using external crystals. This allows us to 
@@ -113,55 +105,71 @@ avoid stepping up the voltage, since running the chip at 8MHz is stable within t
   \centering
   % Reduced width from \linewidth to 0.7\linewidth per request
   \includegraphics[width=0.7\linewidth]{figure/figure_4_1.png}
-  \caption{Safe operating frequencies of the ATmega328P TODO: ADD REFERENCE}
+  \caption{Safe operating frequencies of the ATmega328P. Figure from~\cite[][p.260]{atmega328p}.}
   \label{fig_4_1}
 \end{figure}
 
-To be more specific, we can support voltages between 2.7 and 5.5 volts, which is well within the range of the 3.7 volt LiPo battery. At the voltage we expect the microcontrollers
-to operate at for the majority of the time, their power draw should be about 3.1mA according to the datasheet (TODO: ADD REFERENCE). 
+To be more specific, we can support voltages between 2.7 and 5.5 volts~\cite[][p.260]{atmega328p}, which is well within the range of the 3.7 volt LiPo battery. At the voltage we expect the microcontrollers
+to operate at for the majority of the time, their power draw should each be about 3.1mA according to the datasheet~\cite[][p.268]{atmega328p}. 
 
-\subsection{ESP 32}
-We use the ESP32-C3 super mini in our prototype as the controller of the game. The mictrocontroller requests information from the ATmega328P microcontrollers using I\textsuperscript{2}C, and sends out
-appropriate commands. We use the hardware randomness module within the ESP32, to generate sequences for the game. This ensures a reliable and unpredictable pattern. 
-While the operating voltage of the ESP32 itself is only 3.0 to 3.6 (TODO: ADD REFERENCE), the module we're using has a power input that ranges from 3.3 to 6.0 volts (TODO: ADD REFERENCE).
+\subsubsection{ESP 32}
+We use the ESP32-C3 super mini in our prototype as the controller of the game. The mictrocontroller requests information from the ATmega328P microcontrollers using 
+I\textsuperscript{2}C~\cite[][p.4]{esp32}, and sends out appropriate commands. We use the hardware randomness module~\cite[][p.5]{esp32} within the ESP32, 
+to generate sequences for the game. This ensures a reliable and unpredictable pattern. 
+While the operating voltage of the ESP32 itself is only 3.0 to 3.6~\cite[][p.53]{esp32}, 
+the module we're using has a power input pin that ranges from 3.3 to 6.0 volts~\cite[][p.3]{esp32supermini}.
 Finding an exact expected power draw in the datasheet proved somewhat difficult due to the many possible configurations of the ESP32, but we have concluded it to be 
-between 17 and 28 mA. 
+between 17 and 28mA~\cite[][p.56]{esp32}. 
 
-\subsection{Vibrating Motor}
-The vibrating motors are used for tactile instructions for the player. They operate at between 2.5 and 3.8 volts, which might lead one to think it could be run directly 
-using the LiPo battery. However, the LiPo batteries actually reach up to 4.2 volts when fully charged, as mentioned, which would go over the limit of 3.8 volts.
-We therefore decided to step this down to 3.4 volts. The reason for this specific voltage will be explained in section~\ref{sec_4_L}. It has a maximum rated current draw of
-75 mA.
+\subsubsection{Vibrating Motor}
+The vibrating motors are used for tactile instructions for the player. They operate at between 2.5 and 3.8 volts~\cite[][p.5]{vibratingmotor},
+which might lead one to think it could be run directly using the LiPo battery. However, the LiPo batteries actually reach up to 4.2 volts when fully charged, 
+as mentioned in section~\ref{sec_lipo}, which would go over the limit of 3.8 volts. We therefore decided to step this down to 3.4 volts. 
+The reason for this specific voltage will be explained in section~\ref{sec_4_L}. The motor has a maximum rated current draw of 75mA~\cite[][p.5]{vibratingmotor}.
 
-\subsection{Bipolar junction transistor}
-To supply enough current to the vibrating motors, we can't just draw from a pin, since those are only rated for about 40 mA. We want more current than this, so we use the 
-BC547, which has a maximum collector current of 100 mA. This means our vibrating motors fit nicely within the current limit. The voltage rating is also more than sufficient,
-with both the collector-base and collector-emitter voltage rating being over 40 volts. The emitter-base voltage rating is 6 volts, which is well above our 4.2 maximum voltage.
+\subsubsection{Bipolar junction transistor}
+To supply enough current to the vibrating motors, we can't just draw from a pin, since those are only rated for about 40mA~\cite[][p.258]{atmega328p}. 
+We want more current than this, so we use the BC547~\cite{transistor}, which has a maximum collector current of 100mA~\cite[][p.1]{transistor}. 
+This means our vibrating motors fit nicely within the current limit. 
+The voltage rating is also more than sufficient, with both the collector-base and collector-emitter voltage rating being over 40 volts~\cite[][p.1]{transistor}. 
+The emitter-base voltage rating is 6 volts~\cite[][p.1]{transistor}, which is well above our 4.2 maximum voltage.
 
-\subsection{Light Emitting Diode}
-For the LEDs we simply used the ones at the lab, so we don't have the exact datasheet. This isn't strictly necesary though, as LEDs of this size are somewhat standard.
-We use both the standard single color LEDs and the multicolor LEDs. For the multicolor LEDs, we mostly found that they have a current rating of 20mA (TODO: Add reference) 
-per color. The forward voltage depends on the color, but for our usage, it should be respectively 2V and 3.7V for the red and green colors. 
+\subsubsection{Light Emitting Diode}
+For the LEDs we simply used the ones at the lab, so we don't have the exact datasheet. This isn't strictly necessary though, as LEDs of this size are somewhat standard.
+We use both the standard single color LEDs and the multicolor LEDs. For the multicolor LEDs, we mostly found that they have a current rating of 20mA~\cite[][p.1]{multicolorled} 
+per color. The forward voltage depends on the color, but for our usage, it should be respectively 2.3V and 3.4V for the red and green colors~\cite[][p.1]{multicolorled}. 
 
-For the single color LED, we've used a standard datasheet we found on a reputable vendor site, and concluded the rated current to be at most 30 mA, but we'll be a bit cautious
-and say 20mA, as that was the most common we could find for this type of LED. For the forward voltage it, again, depends on color, but we've chosen to assume a forward 
-voltage of 2V, as that will give a greater degree of caution than assuming a higher forward voltage. In practice, we've found the LEDs to be bright enough with these 
-assumptions.
+For the single color LED, we've used a standard datasheet we found on a reputable vendor site~\cite{led}, and concluded the rated current to be, at most, 30mA~\cite[][p.2]{led}, 
+but we'll be a bit cautious and say 20mA, as that was the most common lower bound we could find for this type of LED. For the forward voltage it, again, depends on color, 
+but we've chosen to assume a forward voltage of 2V\footnote{This should be below the correct value. }, as that will give a greater degree of caution than assuming a higher forward voltage. 
+In practice, we've found the LEDs to be bright enough with these assumptions.
 
-\subsection{Low Dropout Regulator}\label{sec_4_L}
-To reduce the voltage from the LiPo to 3.4 volts, we use a low dropout regulator. These are a type of linear voltage regulator, with the advantage that they work 
+\subsubsection{Low Dropout Regulator}\label{sec_4_L}
+To step down the voltage from the LiPo to 3.4 volts, we use a low dropout regulator~\cite{ldo}. These are a type of linear voltage regulator, with the advantage that they work 
 even when the input voltage is close to the configured output voltage. This is exactly our use-case. Specifically, we're using the MIC29302WT, which has an output voltage 
-range between 1.25 and 25 V, and an input voltage range between 2.3 to 26 V. The rated current is up to 3A, which is way more than needed for this project, but since the 
-component was bought by a person in the group, they wanted the component to be very versatile for their other projects, which is also the reason for the adjustable output
-voltage. A more suited component for this prototype could've been something like the (TODO: INSERT OTHER LDO HERE), which has a lower current rating and outputs 3.3 volts. 
+range between 1.25V and 25V, and an input voltage range between 2.3V to 26V~\cite[][p.4-7]{ldo}\footnote{See note 7 in~\cite[][p.7]{ldo}.}. The rated current is up to 3A, 
+which is way more than needed for this project, but since the component was bought by a person in the group, 
+they wanted the component to be very versatile for other future personal projects, which is also the reason for the adjustable output voltage. 
+A more suited component for this prototype could've been something like the R1517J341B-T1-FE~\cite{ldoalternative}, 
+which has a lower current rating of 500mA and outputs 3.4 volts. 
 \\
-The reason for choosing 3.4 volt over 3.3 volt, was to keep the vibration strength higher for longer. While the LDO can maintain the voltage, it does some dropout. According
-to the datasheet (TODO: ADD REFERENCE), for example, the output voltage might drop as low as 3V, when the battery has reached 3.5 volts, given a high enough current. 
+The reason for choosing 3.4 volt over 3.3 volt, was to keep the vibration strength at a higher level for longer. While the LDO can maintain the voltage, it does still have dropout. According
+to the datasheet, for example, the output voltage might drop as low as 3V, when the battery has reached 3.5 volts, given a high enough current~\cite[][p.12]{ldo}. 
 Though the current won't be that high in our case. To ensure proper vibration, we've therefore set the target voltage a bit higher than we actually need, 
 to hopefully ensure a better player experience for a wider voltage range. \\[0.5pt]
 
 \noindent The efficiency of the LDO is simply the output voltage divided by the input voltage, since it's a type of linear voltage regulator. This gives us an efficiency of about 
 $\frac{3.4}{4.2} \approx 0.81$ in the worst case\footnote{The worst case efficiency is a fully charged battery. }.
+
+\subsection{Assembly}
+
+\subsubsection{Box assembly}
+
+\subsubsection{Wiring}
+
+\subsection{Firmware}
+
+\subsection{Electronics Calculations}
 
 \section{Limitations and future work}
 %In the limitations section, identify constraints or drawbacks of your prototype. These could include technical limitations, cost restrictions, or any design choices that may have affected the prototype's performance. Be honest about the areas where improvements or refinements could be made. The future work could outline potential enhancements and extensions for your prototype. Suggest areas where further development or research could lead to more robust solutions. Discuss how your prototype could be applied in different contexts or industries and what additional features or improvements.
