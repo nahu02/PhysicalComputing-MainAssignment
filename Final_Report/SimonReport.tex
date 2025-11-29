@@ -90,11 +90,11 @@ and 3.7 volts\footnote{Actually a voltage range since it's connected directly to
 %% Maybe Add this later? 
 %% Below is an overview of the electrical characteristics of the components included, but they will be further explained in their own subsection.
 \subsection{Components}
-\subsubsection{LiPo battery}\label{sec_lipo}
+\subsubsection{LiPo battery}\label{sec_component_lipo}
 As mentioned, we use two LiPo batteries each of which has a capacity of 820 mAh~\cite[][p.1]{lipodatasheet}. They have an operating voltage range between 2.75 and 
 4.2V~\cite[][p.3]{lipodatasheet}, at respectively fully discharged and charged states. They are also very reliable and safe~\cite[][p.4-6]{lipodatasheet}, which makes them well suited for a toy.
 
-\subsubsection{ATmega328P}
+\subsubsection{ATmega328P}\label{sec_component_atmega}
 The ATmega328P is used in our two agent boards, and control the actuators of the game. They also send information about button presses back to the controller upon request.
 We make use of eight of their I/O pins directly for the buttons and actuators, and we also make use of their I\textsuperscript{2}C~\cite[][p.173]{atmega328p} capabilities to communicate with the
 controller board. These work in a wide voltage range and have a fairly low power draw. 
@@ -112,7 +112,7 @@ avoid stepping up the voltage, since running the chip at 8MHz is stable within t
 To be more specific, we can support voltages between 2.7 and 5.5 volts~\cite[][p.260]{atmega328p}, which is well within the range of the 3.7 volt LiPo battery. At the voltage we expect the microcontrollers
 to operate at for the majority of the time, their power draw should each be about 3.1mA according to the datasheet~\cite[][p.268]{atmega328p}. 
 
-\subsubsection{ESP 32}
+\subsubsection{ESP 32}\label{sec_component_esp32}
 We use the ESP32-C3 super mini in our prototype as the controller of the game. The mictrocontroller requests information from the ATmega328P microcontrollers using 
 I\textsuperscript{2}C~\cite[][p.4]{esp32}, and sends out appropriate commands. We use the hardware randomness module~\cite[][p.5]{esp32} within the ESP32, 
 to generate sequences for the game. This ensures a reliable and unpredictable pattern. 
@@ -121,20 +121,20 @@ the module we're using has a power input pin that ranges from 3.3 to 6.0 volts~\
 Finding an exact expected power draw in the datasheet proved somewhat difficult due to the many possible configurations of the ESP32, but we have concluded it to be 
 between 17 and 28mA~\cite[][p.56]{esp32}. 
 
-\subsubsection{Vibrating Motor}
+\subsubsection{Vibrating Motor}\label{sec_component_vibratingmotor}
 The vibrating motors are used for tactile instructions for the player. They operate at between 2.5 and 3.8 volts~\cite[][p.5]{vibratingmotor},
 which might lead one to think it could be run directly using the LiPo battery. However, the LiPo batteries actually reach up to 4.2 volts when fully charged, 
-as mentioned in section~\ref{sec_lipo}, which would go over the limit of 3.8 volts. We therefore decided to step this down to 3.4 volts. 
-The reason for this specific voltage will be explained in section~\ref{sec_4_L}. The motor has a maximum rated current draw of 75mA~\cite[][p.5]{vibratingmotor}.
+as mentioned in section~\ref{sec_component_lipo}, which would go over the limit of 3.8 volts. We therefore decided to step this down to 3.4 volts. 
+The reason for this specific voltage will be explained in section~\ref{sec_component_ldo}. The motor has a maximum rated current draw of 75mA~\cite[][p.5]{vibratingmotor}.
 
-\subsubsection{Bipolar junction transistor}
+\subsubsection{Bipolar junction transistor}\label{sec_component_bjt}
 To supply enough current to the vibrating motors, we can't just draw from a pin, since those are only rated for about 40mA~\cite[][p.258]{atmega328p}. 
 We want more current than this, so we use the BC547~\cite{transistor}, which has a maximum collector current of 100mA~\cite[][p.1]{transistor}. 
 This means our vibrating motors fit nicely within the current limit. 
 The voltage rating is also more than sufficient, with both the collector-base and collector-emitter voltage rating being over 40 volts~\cite[][p.1]{transistor}. 
 The emitter-base voltage rating is 6 volts~\cite[][p.1]{transistor}, which is well above our 4.2 maximum voltage.
 
-\subsubsection{Light Emitting Diode}
+\subsubsection{Light Emitting Diode}\label{sec_component_led}
 For the LEDs we simply used the ones at the lab, so we don't have the exact datasheet. This isn't strictly necessary though, as LEDs of this size are somewhat standard.
 We use both the standard single color LEDs and the multicolor LEDs. For the multicolor LEDs, we mostly found that they have a current rating of 20mA~\cite[][p.1]{multicolorled} 
 per color. The forward voltage depends on the color, but for our usage, it should be respectively 2.3V and 3.4V for the red and green colors~\cite[][p.1]{multicolorled}. 
@@ -144,7 +144,7 @@ but we'll be a bit cautious and say 20mA, as that was the most common lower boun
 but we've chosen to assume a forward voltage of 2V\footnote{This should be below the correct value. }, as that will give a greater degree of caution than assuming a higher forward voltage. 
 In practice, we've found the LEDs to be bright enough with these assumptions.
 
-\subsubsection{Low Dropout Regulator}\label{sec_4_L}
+\subsubsection{Low Dropout Regulator}\label{sec_component_ldo}
 To step down the voltage from the LiPo to 3.4 volts, we use a low dropout regulator~\cite{ldo}. These are a type of linear voltage regulator, with the advantage that they work 
 even when the input voltage is close to the configured output voltage. This is exactly our use-case. Specifically, we're using the MIC29302WT, which has an output voltage 
 range between 1.25V and 25V, and an input voltage range between 2.3V to 26V~\cite[][p.4-7]{ldo}\footnote{See note 7 in~\cite[][p.7]{ldo}.}. The rated current is up to 3A, 
@@ -170,6 +170,65 @@ $\frac{3.4}{4.2} \approx 0.81$ in the worst case\footnote{The worst case efficie
 \subsection{Firmware}
 
 \subsection{Electronics Calculations}
+\subsubsection{Sequence LEDs}
+As mentioned in section~\ref{sec_component_led}, we'll assume a forward voltage of 2V, and we'll target a current at about 20mA. The LEDs are on the 3.7V power rail.
+To calculate the resistance of the needed resistor, we'll first calulate the voltage across the resistor as $V_R=V_{supply}-V_F=1.7\text{V}$. After this it's a simple
+calculation using ohm's law with
+\[
+	R=\frac{V_R}{I}=\frac{1.7\text{V}}{20\text{mA}}=85\Omega
+\]
+We'll then round this up to a standard resistor value to ensure that we don't exceed the current limit we set. Which is why resistors (TODO: ADD RESISTOR REFERENCES) are
+100 ohm resistors.
+
+\subsubsection{Multicolor LEDs}
+The calculations for these LEDs look very similar. You can see the values in section~\ref{sec_component_led}. The calculated values are as follows:
+\[
+	R_{red}=\frac{V_{supply}-V_F}{I}=\frac{1.4\text{V}}{20\text{mA}}=70\Omega
+\]
+\[
+	R_{green}=\frac{V_{supply}-V_F}{I}=\frac{0.3\text{V}}{20\text{mA}}=15\Omega
+\]
+For safety, we round these up to respectively 100 ohms and 33 ohms, for respectively resistors (TODO: ADD REFERENCE TO RESISTORS).
+
+\subsubsection{Motors}
+For the resistor limiting the current to the motor itself, it's once again just ohms law\footnote{See section~\ref{sec_component_vibratingmotor} for motor values}.
+This gives us
+\[
+	R=\frac{V_{supply}}{I}=\frac{3.4}{75\text{mA}}=45.\overline{3}\Omega
+\]
+Which we round up to 47 ohms\footnote{This value also works if we calculate with an extra bit of safety using 3.5V instead of 3.4V.}. This is the value of resistors
+(TODO: ADD REFERENCE TO RESISTORS).
+
+\subsubsection{Transistors}
+Since we're using the transistors as switches, we'll be operating them in forced beta condition. Specifically we'll be using a forced beta of 10, meaning
+the base current will be a tenth of the desired collector current. This will ensure current can flow correctly through the collector at the rate we want.
+Some simple math tells us that this means the base current will be $I_B=\frac{I_C}{\beta}=\frac{75\text{mA}}{10}=7.5\text{mA}$. To calculate the resistance value
+needed, we then use the saturation voltage of the base-emitter~\cite[][p.1]{transistor}, which finally gives us the calculation
+\[
+	R=\frac{V_{supply}-V_{BE_{sat}}}{I_B}=\frac{2.6\text{V}}{7.5\text{mA}}=373.\overline{3}\Omega
+\]
+For this value, we'll round down to ensure that the base is saturated. Thus we've chosen a resistor value of 330 ohms for resistors (TODO: ADD REFERENCE TO RESISTORS).
+
+\subsubsection{Low dropout regulator}
+Since we're using an adjustable LDO, we'll need to set the voltage using a voltage divider. The MIC29302WT has an internal reference voltage of 1.240V~\cite[][p.6]{ldo}, which is 
+used in collaboration with the adjustment pin to set the voltage. The voltage divider needs two resistors, and the resistance values of these is calculated using the equation
+in the datasheet~\cite[][p.25]{ldo}. We'll need to choose one of the resistor values and then calculate the other. Using the examples in the datasheet~\cite[][p.3]{ldo}, we've chosen 
+R2 to have a resistance of 390 ohms. We can then calculate the value of R1 using~\cite[][p.25]{ldo}
+\[
+	R1=R2\left(\frac{V_{supply}}{1.24}-1\right)=390\left(\frac{3.4}{1.24}-1\right)\approx 679
+\]
+which is almost exactly 680 ohms. We've therefore chosen this resistor value. The resistors in the circuit diagrams are (TODO: ADD REFERENCE TO RESISTORS). Note that 
+the datasheet also mentions a minimum load to have the correct output voltage~\cite[][p.25]{ldo}. This is due to current leakage. We don't actually have a constant load on the output 
+beside the voltage regulator, which doesn't draw enough current. We've tested the voltage in practice, and found that the leakage is so small, that the motors will be 
+completely fine\footnote{The voltage went up to about 3.55V, but since motors use inductors to work, this will limit the current for the short period of time it takes the
+voltage to stabilize to the correct value. In addition, the motor resistor is actually also almost the correct value even with 3.55V.}. 
+
+For the capacitors used, we simply used the values from the datasheet~\cite[][p.26]{ldo}. This gives us the values for capacitors (TODO: ADD REFERENCE TO CAPACITORS). 
+
+\subsubsection{The rest of the resistors}
+The rest of the resistors are either pull-up or pull-down resistors in the 1K-22K range. The specific values weren't calculated as such, but were instead chosen either 
+based on examples in the related datasheet or based on values used in lectures given. The specific value shouldn't be too important, unless a specific component has a 
+current limit on the pin where the resistor is located. This is not the case for the resistors we chose ourselves, as these were pull-downs for buttons and switches.
 
 \section{Limitations and future work}
 %In the limitations section, identify constraints or drawbacks of your prototype. These could include technical limitations, cost restrictions, or any design choices that may have affected the prototype's performance. Be honest about the areas where improvements or refinements could be made. The future work could outline potential enhancements and extensions for your prototype. Suggest areas where further development or research could lead to more robust solutions. Discuss how your prototype could be applied in different contexts or industries and what additional features or improvements.
