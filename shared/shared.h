@@ -21,11 +21,10 @@ void receiveIndex(int bytes) {
       }
       break;
     default:
-      if (isPhase1) {
-        for (auto node : nodes) {
-          if (node.id == directive) {
-            digitalWrite(node.actuatorPin, HIGH);
-          }
+      // In any phase actuators need to be addressable (because feedback happens in phase 2)
+      for (auto node : nodes) {
+        if (node.id == directive) {
+          digitalWrite(node.actuatorPin, HIGH);
         }
       }
       break;
