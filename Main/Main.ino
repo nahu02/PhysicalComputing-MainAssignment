@@ -2,6 +2,35 @@
 
 #include <Wire.h>
 
+// Comment out the define to disable WebSerial and Wifi completely
+#define DEBUG
+
+#ifdef DEBUG
+#include <AsyncTCP.h>
+#include <WiFi.h>
+#include <ESPAsyncWebServer.h>
+#include <MycilaWebSerial.h>
+
+AsyncWebServer server(80);
+WebSerial webSerial;
+#else
+// Dummy class to do nothing when Debug is disabled
+class DummySerial
+{
+public:
+  template <typename T>
+  void print(T) {}
+  template <typename T, typename U>
+  void print(T, U) {}
+  template <typename T>
+  void println(T) {}
+  template <typename T, typename U>
+  void println(T, U) {}
+  void println() {}
+};
+DummySerial webSerial;
+#endif
+
 // Configuration
 const int PHASE_TRANSITION_DELAY_MS = 100;
 const int PATTERN_LENGTH_MIN = 3;
@@ -134,26 +163,26 @@ void generatePattern(int playerIndex, int round)
 
   const PlayerConfig &player = players[playerIndex];
 
-  Serial.print("Player ");
-  Serial.print(playerIndex == 0 ? "A" : "B");
-  Serial.print(" Round ");
-  Serial.print(round);
-  Serial.print(" - Difficulty: len=");
-  Serial.print(patternLength);
-  Serial.print(" activeMs=");
-  Serial.print(currentActiveMs);
-  Serial.print(" delayMs=");
-  Serial.print(currentDelayMs);
-  Serial.print(" Pattern: ");
+  webSerial.print("Player ");
+  webSerial.print(playerIndex == 0 ? "A" : "B");
+  webSerial.print(" Round ");
+  webSerial.print(round);
+  webSerial.print(" - Difficulty: len=");
+  webSerial.print(patternLength);
+  webSerial.print(" activeMs=");
+  webSerial.print(currentActiveMs);
+  webSerial.print(" delayMs=");
+  webSerial.print(currentDelayMs);
+  webSerial.print(" Pattern: ");
 
   for (int i = 0; i < patternLength; i++)
   {
     activePattern[i] = player.actuatorIndexes[random(0, player.numIndexes)];
-    Serial.print(activePattern[i]);
+    webSerial.print(activePattern[i]);
     if (i < patternLength - 1)
-      Serial.print(", ");
+      webSerial.print(", ");
   }
-  Serial.println();
+  webSerial.println();
 }
 
 // Broadcast a single byte to all agents
@@ -252,10 +281,10 @@ bool updatePatternDisplay()
   {
   case PD_ACTIVATE:
     sendToAgent(players[currentPlayer].i2cAddress, activePattern[patternDisplayIndex]);
-    Serial.print("Pattern Display - Player ");
-    Serial.print(currentPlayer == 0 ? "A" : "B");
-    Serial.print("  Activate: 0x");
-    Serial.println(activePattern[patternDisplayIndex], HEX);
+    webSerial.print("Pattern Display - Player ");
+    webSerial.print(currentPlayer == 0 ? "A" : "B");
+    webSerial.print("  Activate: 0x");
+    webSerial.println(activePattern[patternDisplayIndex], HEX);
     stateStartTime = millis();
     pdStep = PD_WAIT_ACTIVE;
     break;
@@ -290,7 +319,7 @@ PollResult updateInputPolling()
   // Check timeout
   if (millis() - stateStartTime >= INPUT_TIMEOUT_MS)
   {
-    Serial.println("  TIMEOUT!");
+    webSerial.println("  TIMEOUT!");
     return POLL_TIMEOUT;
   }
 
@@ -312,15 +341,15 @@ PollResult updateInputPolling()
     // Check if agent reported a button press (non-zero, valid range)
     if (receivedByte > 0x00 && receivedByte <= 0x0F)
     {
-      Serial.print("  Button press: 0x");
-      Serial.print(receivedByte, HEX);
-      Serial.print(" (expected: 0x");
-      Serial.print(activePattern[patternIndex], HEX);
-      Serial.println(")");
+      webSerial.print("  Button press: 0x");
+      webSerial.print(receivedByte, HEX);
+      webSerial.print(" (expected: 0x");
+      webSerial.print(activePattern[patternIndex], HEX);
+      webSerial.println(")");
 
       if (receivedByte == activePattern[patternIndex])
       {
-        Serial.println("  Correct!");
+        webSerial.println("  Correct!");
         startShortGreenFlash(currentPlayer);
         patternIndex++;
         stateStartTime = millis(); // Reset timeout for next button
@@ -332,7 +361,7 @@ PollResult updateInputPolling()
       }
       else
       {
-        Serial.println("  WRONG!");
+        webSerial.println("  WRONG!");
         return POLL_WRONG;
       }
     }
@@ -348,12 +377,28 @@ void setup()
     delay(50); // Wait for serial port to connect
   }
 
-  Serial.println("Simon Says - Main Controller");
-  Serial.println("============================");
+  // Web debug setup
+#ifdef DEBUG
+  WiFi.softAP("TactileSimonDebug");
+  webSerial.onMessage([](const std::string &msg)
+                      { Serial.println(msg.c_str()); });
+  webSerial.begin(&server);
+  webSerial.setBuffer(100);
+  server.onNotFound([](AsyncWebServerRequest *request)
+                    { request->redirect("/webserial"); });
+  server.begin();
+#endif
+
+  delay(50);
+
+  webSerial.print("foo bar baz"); // TODO: remove
+
+  webSerial.println("Simon Says - Main Controller");
+  webSerial.println("============================");
 
   // Initialize I2C as main
   Wire.begin();
-  Serial.println("I2C initialized as main");
+  webSerial.println("I2C initialized as main");
 
   // Check that all I2C agents are reachable
   bool errorPresent;
@@ -367,24 +412,24 @@ void setup()
       uint8_t error = Wire.endTransmission();
       if (error == 0)
       {
-        Serial.print("I2C agent 0x");
-        Serial.print(agent, HEX);
-        Serial.println(" is reachable");
+        webSerial.print("I2C agent 0x");
+        webSerial.print(agent, HEX);
+        webSerial.println(" is reachable");
       }
       else
       {
         errorPresent = true;
-        Serial.print("I2C agent 0x");
-        Serial.print(agent, HEX);
-        Serial.println(" is NOT reachable");
+        webSerial.print("I2C agent 0x");
+        webSerial.print(agent, HEX);
+        webSerial.println(" is NOT reachable");
       }
     }
     delay(500);
   } while (errorPresent);
 
-  Serial.println("\nStarting game...");
-  Serial.print("First player: ");
-  Serial.println(startingPlayer == 0 ? "A" : "B");
+  webSerial.println("\nStarting game...");
+  webSerial.print("First player: ");
+  webSerial.println(startingPlayer == 0 ? "A" : "B");
 
   // Small delay before starting
   delay(1000);
@@ -406,9 +451,9 @@ void loop()
     broadcastByte(MSG_PHASE1); // Tell all agents: pattern display mode
     stateStartTime = millis();
     gameState = SHOW_PATTERN;
-    Serial.print("\n=== Player ");
-    Serial.print(currentPlayer == 0 ? "A" : "B");
-    Serial.println(" - Showing Pattern ===");
+    webSerial.print("\n=== Player ");
+    webSerial.print(currentPlayer == 0 ? "A" : "B");
+    webSerial.println(" - Showing Pattern ===");
     break;
 
   case SHOW_PATTERN:
@@ -419,9 +464,9 @@ void loop()
       stateStartTime = millis();
       lastPollTime = 0;
       gameState = AWAIT_INPUT;
-      Serial.print("=== Player ");
-      Serial.print(currentPlayer == 0 ? "A" : "B");
-      Serial.println(" - Awaiting Input ===");
+      webSerial.print("=== Player ");
+      webSerial.print(currentPlayer == 0 ? "A" : "B");
+      webSerial.println(" - Awaiting Input ===");
     }
     break;
 
@@ -430,17 +475,17 @@ void loop()
     PollResult result = updateInputPolling();
     if (result == POLL_PATTERN_COMPLETE)
     {
-      Serial.print("Player ");
-      Serial.print(currentPlayer == 0 ? "A" : "B");
-      Serial.println(" completed pattern successfully!");
+      webSerial.print("Player ");
+      webSerial.print(currentPlayer == 0 ? "A" : "B");
+      webSerial.println(" completed pattern successfully!");
       playerCompletedThisRound[currentPlayer] = true;
       gameState = TURN_COMPLETE;
     }
     else if (result == POLL_WRONG || result == POLL_TIMEOUT)
     {
-      Serial.print("Player ");
-      Serial.print(currentPlayer == 0 ? "A" : "B");
-      Serial.println(" FAILED!");
+      webSerial.print("Player ");
+      webSerial.print(currentPlayer == 0 ? "A" : "B");
+      webSerial.println(" FAILED!");
       startWinLoseSequence(currentPlayer); // currentPlayer is the loser
       stateStartTime = millis();
       gameState = GAME_OVER;
@@ -458,9 +503,9 @@ void loop()
       roundNumber++;
       playerCompletedThisRound[0] = false;
       playerCompletedThisRound[1] = false;
-      Serial.print("\n========== ROUND ");
-      Serial.print(roundNumber);
-      Serial.println(" ==========");
+      webSerial.print("\n========== ROUND ");
+      webSerial.print(roundNumber);
+      webSerial.println(" ==========");
     }
 
     gameState = INIT;
@@ -470,11 +515,11 @@ void loop()
     // Wait for feedback blink sequence to complete
     if (feedbackType == FB_NONE)
     {
-      Serial.println("\n=== GAME OVER ===");
-      Serial.print("Winner: Player ");
-      Serial.println(currentPlayer == 0 ? "B" : "A");
-      Serial.print("Rounds completed: ");
-      Serial.println(roundNumber);
+      webSerial.println("\n=== GAME OVER ===");
+      webSerial.print("Winner: Player ");
+      webSerial.println(currentPlayer == 0 ? "B" : "A");
+      webSerial.print("Rounds completed: ");
+      webSerial.println(roundNumber);
       stateStartTime = millis();
       gameState = RESTART_DELAY;
     }
@@ -489,9 +534,9 @@ void loop()
       roundNumber = 0;
       playerCompletedThisRound[0] = false;
       playerCompletedThisRound[1] = false;
-      Serial.println("\n\n========== NEW GAME ==========");
-      Serial.print("Starting player: ");
-      Serial.println(startingPlayer == 0 ? "A" : "B");
+      webSerial.println("\n\n========== NEW GAME ==========");
+      webSerial.print("Starting player: ");
+      webSerial.println(startingPlayer == 0 ? "A" : "B");
       gameState = INIT;
     }
     break;
