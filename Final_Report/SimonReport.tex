@@ -1,5 +1,6 @@
 \documentclass[acmsmall]{acmart}
 
+\usepackage{pdfpages}
 \usepackage{caption}
 \usepackage{subcaption}
 \usepackage{fancyhdr}
@@ -41,8 +42,14 @@
 %% The abstract is a short summary of the work to be presented in the article. In the abstract, briefly introduce your project and its main purpose. Describe the problem it aims to solve or the objective it seeks to achieve. Mention the key features and technologies used in your prototype. Provide a glimpse of your project's significance and its potential impact in the field.
 \textbf{ABSTRACT}
 
-\noindent XXXXXX
+\noindent In this report, we'll present our prototype of a multimodal simon says game. The prototype
+explores using tactile and visual patterns as a spin on the original game. It also add a multi-player 
+aspect, to improve engagement through friendly competition in this new take on the sequential memory game.
 
+We explore the usage of multiple microcontrollers communicating through I\textsuperscript{2}C, to 
+both take input from the users, and to present the memory sequences to them. We describe our 
+prototyping process in relation to both the electronics and 3D modeling, in addition to a 
+walkthrough of the final assembly of the prototype. 
 
 \end{abstract}
 
@@ -58,8 +65,8 @@
 \maketitle
 \pagestyle{fancy}
 \fancyhf{} % Clear the current header and footer
-\fancyhead[L]{\fontsize{8}{9}\selectfont Example of Final Report: Lunar Shuttle - Stationary Moon Mission Toy}% Your project title
-\fancyhead[R]{\fontsize{8}{9}\selectfont Group2} % The number of your group
+\fancyhead[L]{\fontsize{8}{9}\selectfont Final Report: Multimodal Simon Says}% Your project title
+\fancyhead[R]{\fontsize{8}{9}\selectfont Group 9} % The number of your group
 \renewcommand{\headrulewidth}{0.1pt}
 \fancyfoot[C]{\thepage} 
 % acmsmall is an article class without chapters; avoid redefining \chaptermark
@@ -67,6 +74,7 @@
 
 
 
+\newpage
 \section{Introduction}
 XXXXXX
 %%In the introduction, provide a more comprehensive context for your prototype. Explain the background, real-world relevance, and motivation for undertaking this project. Clearly define the problem or challenge that your prototype addresses. Emphasize why this problem is worth solving and how your prototype contributes to solving it. Outline the specific objectives and goals your prototype aims to achieve.
@@ -100,13 +108,13 @@ We make use of eight of their I/O pins directly for the buttons and actuators, a
 controller board. These work in a wide voltage range and have a fairly low power draw. 
 
 Due to the simplicity of what we're using them for, and the reduced power draw, we've decided against running these at 16MHz using external crystals. This allows us to 
-avoid stepping up the voltage, since running the chip at 8MHz is stable within the voltage range of a standard LiPo battery as seen in figure~\ref{fig_4_1}.
+avoid stepping up the voltage, since running the chip at 8MHz is stable within the voltage range of a standard LiPo battery as seen in figure~\ref{fig:safe_operating_range}.
 \begin{figure}[h]
   \centering
   % Reduced width from \linewidth to 0.7\linewidth per request
   \includegraphics[width=0.7\linewidth]{figure/figure_4_1.png}
   \caption{Safe operating frequencies of the ATmega328P. Figure from~\cite[][p.260]{atmega328p}.}
-  \label{fig_4_1}
+  \label{fig:safe_operating_range}
 \end{figure}
 
 To be more specific, we can support voltages between 2.7 and 5.5 volts~\cite[][p.260]{atmega328p}, which is well within the range of the 3.7 volt LiPo battery. At the voltage we expect the microcontrollers
@@ -177,8 +185,8 @@ calculation using ohm's law with
 \[
 	R=\frac{V_R}{I}=\frac{1.7\text{V}}{20\text{mA}}=85\Omega
 \]
-We'll then round this up to a standard resistor value to ensure that we don't exceed the current limit we set. Which is why resistors (TODO: ADD RESISTOR REFERENCES) are
-100 ohm resistors.
+We'll then round this up to a standard resistor value to ensure that we don't exceed the current limit we set. Which is why resistors 
+R10 and R11 in figure~\ref{fig:agent_board_schematic} are 100 ohm resistors.
 
 \subsubsection{Multicolor LEDs}
 The calculations for these LEDs look very similar. You can see the values in section~\ref{sec_component_led}. The calculated values are as follows:
@@ -188,7 +196,7 @@ The calculations for these LEDs look very similar. You can see the values in sec
 \[
 	R_{green}=\frac{V_{supply}-V_F}{I}=\frac{0.3\text{V}}{20\text{mA}}=15\Omega
 \]
-For safety, we round these up to respectively 100 ohms and 33 ohms, for respectively resistors (TODO: ADD REFERENCE TO RESISTORS).
+For safety, we round these up to respectively 100 ohms and 33 ohms, for respectively resistors R15 and R14 in figure~\ref{fig:agent_board_schematic}.
 
 \subsubsection{Motors}
 For the resistor limiting the current to the motor itself, it's once again just ohms law\footnote{See section~\ref{sec_component_vibratingmotor} for motor values}.
@@ -197,7 +205,7 @@ This gives us
 	R=\frac{V_{supply}}{I}=\frac{3.4}{75\text{mA}}=45.\overline{3}\Omega
 \]
 Which we round up to 47 ohms\footnote{This value also works if we calculate with an extra bit of safety using 3.5V instead of 3.4V.}. This is the value of resistors
-(TODO: ADD REFERENCE TO RESISTORS).
+R12 and R13 in figure~\ref{fig:agent_board_schematic}.
 
 \subsubsection{Transistors}
 Since we're using the transistors as switches, we'll be operating them in forced beta condition. Specifically we'll be using a forced beta of 10, meaning
@@ -207,7 +215,8 @@ needed, we then use the saturation voltage of the base-emitter~\cite[][p.1]{tran
 \[
 	R=\frac{V_{supply}-V_{BE_{sat}}}{I_B}=\frac{2.6\text{V}}{7.5\text{mA}}=373.\overline{3}\Omega
 \]
-For this value, we'll round down to ensure that the base is saturated. Thus we've chosen a resistor value of 330 ohms for resistors (TODO: ADD REFERENCE TO RESISTORS).
+For this value, we'll round down to ensure that the base is saturated. Thus we've chosen a resistor value of 330 ohms for resistors
+R6 and R8 in figure~\ref{fig:agent_board_schematic}.
 
 \subsubsection{Low dropout regulator}
 Since we're using an adjustable LDO, we'll need to set the voltage using a voltage divider. The MIC29302WT has an internal reference voltage of 1.240V~\cite[][p.6]{ldo}, which is 
@@ -217,13 +226,15 @@ R2 to have a resistance of 390 ohms. We can then calculate the value of R1 using
 \[
 	R1=R2\left(\frac{V_{supply}}{1.24}-1\right)=390\left(\frac{3.4}{1.24}-1\right)\approx 679
 \]
-which is almost exactly 680 ohms. We've therefore chosen this resistor value. The resistors in the circuit diagrams are (TODO: ADD REFERENCE TO RESISTORS). Note that 
-the datasheet also mentions a minimum load to have the correct output voltage~\cite[][p.25]{ldo}. This is due to current leakage. We don't actually have a constant load on the output 
-beside the voltage regulator, which doesn't draw enough current. We've tested the voltage in practice, and found that the leakage is so small, that the motors will be 
+which is almost exactly 680 ohms. We've therefore chosen this resistor value. The resistors in the circuit diagrams are R1 and R2 in figure~\ref{fig:controller_board_schematic}, 
+with the same names as in the calculations. Note that the datasheet also mentions a minimum load to have the correct output voltage~\cite[][p.25]{ldo}. 
+This is due to current leakage. We don't actually have a constant load on the output 
+beside the voltage divider, which doesn't draw enough current. We've tested the voltage in practice, and found that the leakage is so small, that the motors will be 
 completely fine\footnote{The voltage went up to about 3.55V, but since motors use inductors to work, this will limit the current for the short period of time it takes the
 voltage to stabilize to the correct value. In addition, the motor resistor is actually also almost the correct value even with 3.55V.}. 
 
-For the capacitors used, we simply used the values from the datasheet~\cite[][p.26]{ldo}. This gives us the values for capacitors (TODO: ADD REFERENCE TO CAPACITORS). 
+For the capacitors used, we simply used the values from the datasheet~\cite[][p.26]{ldo}. This gives us the values for capacitors 
+C1 and C2 in figure~\ref{fig:controller_board_schematic}, which are 22$\mu$F and 10$\mu$F. 
 
 \subsubsection{The rest of the resistors}
 The rest of the resistors are either pull-up or pull-down resistors in the 1K-22K range. The specific values weren't calculated as such, but were instead chosen either 
@@ -240,14 +251,60 @@ XXXXXX
 XXXXXX
 
 
+\newpage
 %% The next two lines define the bibliography style to be used, and
 %% the bibliography file.
 \bibliographystyle{ACM-Reference-Format}
 \bibliography{reference}
 
 
+\newpage
 \appendix
 %% If your work has an appendix, this is the place to put it. like code snippets, extensive data, or supplementary materials that are relevant to your report but would make the main text too lengthy, include them in the appendices.
+
+\includepdf[
+  pages=1,
+  fitpaper=false,
+  scale=0.95,
+  pagecommand={
+    \centering
+    \refstepcounter{figure}%
+    \captionof{figure}{Schematic for the controller board. }\label{fig:controller_board_schematic}
+  }
+]{project_pdfs/controller_board_schematic v13.pdf}
+
+\includepdf[
+  pages=1,
+  fitpaper=false,
+  scale=0.95,
+  pagecommand={
+    \centering
+    \refstepcounter{figure}%
+    \captionof{figure}{PCB Design for the controller board. }\label{fig:controller_board_pcb}
+  }
+]{project_pdfs/controller_board v19.pdf}
+
+\includepdf[
+  pages=1,
+  fitpaper=false,
+  scale=0.95,
+  pagecommand={
+    \centering
+    \refstepcounter{figure}%
+    \captionof{figure}{Schematic for the agent boards. }\label{fig:agent_board_schematic}
+  }
+]{project_pdfs/Agent v9.pdf}
+
+\includepdf[
+  pages=1,
+  fitpaper=false,
+  scale=0.95,
+  pagecommand={
+    \centering
+    \refstepcounter{figure}%
+    \captionof{figure}{PCB Design for the agent boards. }\label{fig:agent_board_pcb}
+  }
+]{project_pdfs/Agent v8.pdf}
 
 \end{document}
 
