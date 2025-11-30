@@ -391,8 +391,6 @@ void setup()
 
   delay(50);
 
-  webSerial.print("foo bar baz"); // TODO: remove
-
   webSerial.println("Simon Says - Main Controller");
   webSerial.println("============================");
 
