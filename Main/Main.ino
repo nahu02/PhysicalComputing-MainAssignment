@@ -10,7 +10,9 @@
 #include <WiFi.h>
 #include <ESPAsyncWebServer.h>
 #include <MycilaWebSerial.h>
+#include <DNSServer.h>
 
+DNSServer dnsServer;
 AsyncWebServer server(80);
 WebSerial webSerial;
 #else
@@ -387,6 +389,7 @@ void setup()
   server.onNotFound([](AsyncWebServerRequest *request)
                     { request->redirect("/webserial"); });
   server.begin();
+  dnsServer.start(53, "*", WiFi.softAPIP());
 #endif
 
   delay(50);
