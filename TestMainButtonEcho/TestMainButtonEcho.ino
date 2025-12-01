@@ -44,6 +44,61 @@ const unsigned long INPUT_POLL_INTERVAL_MS = 20;
 const int AGENT_ADDRESSES[] = {0x10, 0x11};
 const int NUM_AGENTS = 2;
 
+// Mapping from global ID to ATmega local pins (actuatorPin, buttonPin)
+// Based on agent_a.ino and agent_b.ino configurations
+// TODO: THIS IS DIRTY HARD-CODED DATA FOR TESTING ONLY, GET RID OF IT LATER
+struct NodePinMapping {
+  uint8_t globalId;
+  int actuatorPin;
+  int buttonPin;
+  const char* agentName;
+};
+
+const NodePinMapping NODE_MAPPINGS[] = {
+  // Agent A (0x10) - nodes
+  {0x01, 10,  5, "Agent A"},
+  {0x02, 11,  6, "Agent A"},
+  {0x03, 12,  7, "Agent A"},
+  {0x04, 13,  8, "Agent A"},
+  {0x05, 16, -1, "Agent A"},
+  {0x06, 17, -1, "Agent A"}, 
+  // Agent B (0x11) - nodes
+  {0x07, 10,  5, "Agent B"},
+  {0x08, 11,  6, "Agent B"},
+  {0x09, 12,  7, "Agent B"},
+  {0x0A, 13,  8, "Agent B"},
+  {0x0B, 16, -1, "Agent B"},
+  {0x0C, 17, -1, "Agent B"},
+};
+const int NUM_NODE_MAPPINGS = sizeof(NODE_MAPPINGS) / sizeof(NODE_MAPPINGS[0]);
+
+// Get pin mapping for a global ID, returns nullptr if not found
+const NodePinMapping* getPinMapping(uint8_t globalId) {
+  for (int i = 0; i < NUM_NODE_MAPPINGS; i++) {
+    if (NODE_MAPPINGS[i].globalId == globalId) {
+      return &NODE_MAPPINGS[i];
+    }
+  }
+  return nullptr;
+}
+
+// Log the ATmega local pins for a given global ID
+void logLocalPins(uint8_t globalId) {
+  const NodePinMapping* mapping = getPinMapping(globalId);
+  if (mapping) {
+    webSerial.print("  -> ");
+    webSerial.print(mapping->agentName);
+    webSerial.print(" local pins: actuator=");
+    webSerial.print(mapping->actuatorPin);
+    webSerial.print(", button=");
+    if (mapping->buttonPin >= 0) {
+      webSerial.println(mapping->buttonPin);
+    } else {
+      webSerial.println("N/A");
+    }
+  }
+}
+
 // Activation tracking
 bool activationActive = false;
 unsigned long activationStartTime = 0;
@@ -171,6 +226,7 @@ void loop()
         webSerial.print(": index 0x");
         webSerial.print(receivedByte, HEX);
         webSerial.println(" - Activating...");
+        logLocalPins(receivedByte);
 
         // Determine which agent controls this index
         // Assuming Player A (0x10) = indexes 1-6, Player B (0x11) = indexes 7-12
