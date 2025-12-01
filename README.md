@@ -22,6 +22,14 @@ ln shared/shared.h agent_b/shared.h
 
 This creates hardlinks (not copies) so any edits to `shared/shared.h` are immediately reflected in all agent directories.
 
+
+### Nescessary Libraries
+
+For the web debugging (optional, can be disabled via macro in `Main.ino`), install the following libraries via Arduino Library Manager:
+  - `ESP Async WebServer` by `ESP32Async`
+  - `MycilaWebSerial` by `Mathieu Carbou`
+  - `Async TCP` by `ESP32Async`
+
 ## Main (ESP32 C3)
 
 The main acts as the game master, coordinating the game through I2C broadcast messages.
