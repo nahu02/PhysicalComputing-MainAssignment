@@ -46,7 +46,7 @@ const int NUM_AGENTS = 2;
 
 // Mapping from global ID to ATmega local pins (actuatorPin, buttonPin)
 // Based on agent_a.ino and agent_b.ino configurations
-// TODO: THIS IS DIRTY HARD-CODED DATA FOR TESTING ONLY, GET RID OF IT LATER
+// TODO: THIS IS DIRTY HARD-CODED DATA FOR TESTING ONLY, MAKE SURE IT'S UP-TO-DATE BEFORE USE
 struct NodePinMapping {
   uint8_t globalId;
   int actuatorPin;
@@ -56,19 +56,19 @@ struct NodePinMapping {
 
 const NodePinMapping NODE_MAPPINGS[] = {
   // Agent A (0x10) - nodes
-  {0x01, 10,  5, "Agent A"},
-  {0x02, 11,  6, "Agent A"},
-  {0x03, 12,  7, "Agent A"},
-  {0x04, 13,  8, "Agent A"},
-  {0x05, 16, -1, "Agent A"},
-  {0x06, 17, -1, "Agent A"}, 
+  {0x01, 13,  5, "Agent A"},
+  {0x02, 12,  6, "Agent A"},
+  {0x03, 11,  7, "Agent A"},
+  {0x04, 10,  8, "Agent A"},
+  {0x05, 16, -1, "Agent A"},  // A2
+  {0x06, 17, -1, "Agent A"},  // A3
   // Agent B (0x11) - nodes
-  {0x07, 10,  5, "Agent B"},
-  {0x08, 11,  6, "Agent B"},
-  {0x09, 12,  7, "Agent B"},
-  {0x0A, 13,  8, "Agent B"},
-  {0x0B, 16, -1, "Agent B"},
-  {0x0C, 17, -1, "Agent B"},
+  {0x07, 13,  5, "Agent B"},
+  {0x08, 12,  6, "Agent B"},
+  {0x09, 11,  7, "Agent B"},
+  {0x0A, 10,  8, "Agent B"},
+  {0x0B, 16, -1, "Agent B"},  // A2
+  {0x0C, 17, -1, "Agent B"},  // A3
 };
 const int NUM_NODE_MAPPINGS = sizeof(NODE_MAPPINGS) / sizeof(NODE_MAPPINGS[0]);
 
