@@ -3,6 +3,8 @@
 \usepackage{pdfpages}
 \usepackage{caption}
 \usepackage{subcaption}
+\usepackage{graphicx}
+\usepackage{subcaption}
 \usepackage{fancyhdr}
 
 \AtBeginDocument{%
@@ -284,6 +286,11 @@ XXXXXX
   }
 ]{project_pdfs/controller_board v19.pdf}
 
+
+
+
+
+
 \includepdf[
   pages=1,
   fitpaper=false,
@@ -295,6 +302,8 @@ XXXXXX
   }
 ]{project_pdfs/Agent v9.pdf}
 
+
+
 \includepdf[
   pages=1,
   fitpaper=false,
@@ -305,6 +314,102 @@ XXXXXX
     \captionof{figure}{PCB Design for the agent boards. }\label{fig:agent_board_pcb}
   }
 ]{project_pdfs/Agent v8.pdf}
+
+
+% Fusion models controller 
+\clearpage
+\begin{figure}[ht]
+  \centering
+
+  \includegraphics[height=0.5\textheight, width=\textwidth, keepaspectratio]{figure/controller_pcb_side_fusion.png}
+  \caption{Side view of the controller board (Fusion model).}
+
+  \vspace{1em}
+
+  \includegraphics[height=0.5\textheight, width=\textwidth, keepaspectratio]{figure/controller_pcb_top_fusion.png}
+  \caption{Top view of the controller board (Fusion model).}
+
+\end{figure}
+
+
+% PCB without components controller
+\clearpage
+\begin{figure}[ht]
+  \centering
+
+  \includegraphics[height=0.5\textheight, width=\textwidth, keepaspectratio]{figure/controller_pcb_copper_side.jpg}
+  \caption{Bottom view of the controller board without components.}
+
+  \vspace{1em}
+
+  \includegraphics[height=0.5\textheight, width=\textwidth, keepaspectratio]{figure/controller_pcb_fiberglass_side.jpg}
+  \caption{Top view of the controller board without components.}
+
+\end{figure}
+
+
+% PCB with soldered components controller
+\clearpage
+\begin{figure}[ht]
+  % \centering
+  \includegraphics[height=0.5\textheight, width=\textwidth, keepaspectratio]{figure/controller_pcb_soldered_bottom.jpg}
+  \caption{figure}{Bottom view of the controller board with soldered components.}
+
+  \vspace{1em}
+  \includegraphics[height=0.5\textheight, width=\textwidth, keepaspectratio]{figure/controller_pcb_soldered_top.jpg}
+  \caption{figure}{Top view of the controller board with soldered components.}
+
+\end{figure}
+
+
+% agent Fusion 
+\clearpage
+\begin{figure}[ht]
+  \centering
+
+  \includegraphics[height=0.5\textheight, width=\textwidth, keepaspectratio]{figure/agent_pcb_side_fusion.png}
+  \caption{Side view of the agent board (Fusion model).}
+
+  \vspace{1em}
+
+  \includegraphics[height=0.5\textheight, width=\textwidth, keepaspectratio]{figure/agent_pcb_top_fusion.png}
+  \caption{Top view of the agent board (Fusion model).}
+
+\end{figure}
+
+
+% agent w/o components
+\clearpage
+\begin{figure}[ht]
+  \centering
+
+  \includegraphics[height=0.5\textheight, width=\textwidth, keepaspectratio]{figure/agent_pcb_copper_side.jpg}
+  \caption{Bottom view of the agent board without components.}
+
+  \vspace{1em}
+
+  \includegraphics[height=0.5\textheight, width=\textwidth, keepaspectratio]{figure/agent_pcb_fiberglass_side.jpg}
+  \caption{Top view of the agent board without components.}
+
+\end{figure}
+
+
+% agent with components
+
+
+\begin{figure}[ht]
+  \centering
+\clearpage
+  \includegraphics[height=0.5\textheight, width=\textwidth, keepaspectratio]{figure/agent_pcb_soldered_bottom.jpg}
+  \caption{Bottom view of the agent board with soldered components.}
+
+  \vspace{1em}
+
+  \includegraphics[height=0.5\textheight, width=\textwidth, keepaspectratio]{figure/agent_pcb_soldered_top.jpg}
+  \caption{Top view of the agent board with soldered components.}
+
+\end{figure}
+
 
 \end{document}
 
