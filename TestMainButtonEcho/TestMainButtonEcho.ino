@@ -79,7 +79,7 @@ void setup()
 
   // Web debug setup
 #ifdef DEBUG
-  WiFi.softAP("TactileSimonDebug");
+  WiFi.softAP("TactileSimonButtonEcho");
   webSerial.onMessage([](const std::string &msg)
                       { Serial.println(msg.c_str()); });
   webSerial.begin(&server);
