@@ -1,0 +1,46 @@
+Battery:
+https://eemb.oss-accelerate.aliyuncs.com//uploads/20230315/28f8e7468414d2b421c8660279f01e45.pdf
+
+ESP 32:
+https://dl.artronshop.co.th/ESP32-C3%20SuperMini%20datasheet.pdf
+https://www.mouser.dk/datasheet/3/1574/1/esp32-c3_datasheet_en.pdf
+external power: 3.3 - 6V
+Current draw (not 100% clear): 17-28mA
+
+
+Atmega:
+https://ww1.microchip.com/downloads/en/DeviceDoc/Atmel-7810-Automotive-Microcontrollers-ATmega328P_Datasheet.pdf
+0 to 8MHz at 2.7 to 5.5V
+0 to 16MHz at 4.5 to 5.5V
+
+3.6V @ 8MHz -> ~3.1mA
+3.6V @ 16Mhz -> ~5.5mA
+5V @ 16MHz -> ~9mA
+
+Transistor
+https://cdn.sparkfun.com/assets/d/5/e/5/d/BC547.pdf
+
+V_CBO: max 50V
+V_CEO: max 45V
+V_EBO: max 6V
+I_C: 100mA
+
+Vibrating motor:
+https://cdn-shop.adafruit.com/product-files/1201/P1012_datasheet.pdf
+Voltage range: 2.5-3.8V (3V rated)
+Rated current: 75mA max
+
+LED:
+(not the actual datasheet, but LEDs are typically somewhat generic)
+https://downloads.cree-led.com/files/ds/h/HB-C503B-BAS-BAN-GAS-GAN.pdf
+Forward current: 30mA max
+Forward voltage: ~3V (might be a tad high)
+
+
+NOT IN THE PROTOTYPE:
+LDO:
+https://www.mouser.dk/datasheet/3/282/1/MIC2915x-30x-50x-75x-High-Current-Low-Dropout-Regulators-DS20005685B.pdf
+V_OUT: 1.25-25V
+V_IN: 2.3-26V
+Max current: 3A
+Dropout Voltage (max): 600mV
