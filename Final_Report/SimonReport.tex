@@ -122,6 +122,11 @@ avoid stepping up the voltage, since running the chip at 8MHz is stable within t
 To be more specific, we can support voltages between 2.7 and 5.5 volts~\cite[][p.260]{atmega328p}, which is well within the range of the 3.7 volt LiPo battery. At the voltage we expect the microcontrollers
 to operate at for the majority of the time, their power draw should each be about 3.1mA according to the datasheet~\cite[][p.268]{atmega328p}. 
 
+A possible alternative to the atmega328p, could be a PIC line chip, like the PIC16F15244 or similar~\cite{atmegaalternative}. Like the atmega, these have a low power draw 
+and work in a wide voltage range. They also support I\textsuperscript{2}C, which is a key part of our prototype. They also have a low power mode, where they are able to run
+at very low clock frequencies, but in turn use even less than 1mA. This might be usable for this prototype, since the agents only need to react much faster than a human.
+They aren't actually doing any heavy computation of any kind.
+
 \subsubsection{ESP 32}\label{sec_component_esp32}
 We use the ESP32-C3 super mini in our prototype as the controller of the game. The mictrocontroller requests information from the ATmega328P microcontrollers using 
 I\textsuperscript{2}C~\cite[][p.4]{esp32}, and sends out appropriate commands. We use the hardware randomness module~\cite[][p.5]{esp32} within the ESP32, 
@@ -131,11 +136,19 @@ the module we're using has a power input pin that ranges from 3.3 to 6.0 volts~\
 Finding an exact expected power draw in the datasheet proved somewhat difficult due to the many possible configurations of the ESP32, but we have concluded it to be 
 between 17 and 28mA~\cite[][p.56]{esp32}. 
 
+An alternative to the ESP32, could be to just use an atmega328p or similar. We would need to source the randomness ourselves, but a noisy sensor could definitely do this. 
+One advantage of the ESP32 is that, for future work, we could integrate the wireless capabilities into the prototype with little to no extra components. 
+It could, for example, be possible to control the difficulty or keep a scoreboard from your phone. Maybe even connect multiple game boards and play as 4 players.
+
 \subsubsection{Vibrating Motor}\label{sec_component_vibratingmotor}
 The vibrating motors are used for tactile instructions for the player. They operate at between 2.5 and 3.8 volts~\cite[][p.5]{vibratingmotor},
 which might lead one to think it could be run directly using the LiPo battery. However, the LiPo batteries actually reach up to 4.2 volts when fully charged, 
 as mentioned in section~\ref{sec_component_lipo}, which would go over the limit of 3.8 volts. We therefore decided to step this down to 3.4 volts. 
 The reason for this specific voltage will be explained in section~\ref{sec_component_ldo}. The motor has a maximum rated current draw of 75mA~\cite[][p.5]{vibratingmotor}.
+
+An alternative motor could be the FIT0774~\cite{motoralternative}. It's a similar cheap vibrating motor, but it has a lower current limit. It does, however, have a 
+wider voltage operating range, which goes up to the 4.2V like the batteries. This means it would be possible to avoid stepping down the voltage entirely. This would, however,
+yield different vibration strengths depending on the current charge of the battery, which we have tried to avoid, as much as possible, by using an LDO regulator.
 
 \subsubsection{Bipolar junction transistor}\label{sec_component_bjt}
 To supply enough current to the vibrating motors, we can't just draw from a pin, since those are only rated for about 40mA~\cite[][p.258]{atmega328p}. 
