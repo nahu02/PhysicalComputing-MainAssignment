@@ -40,9 +40,17 @@ const int PATTERN_LENGTH_MAX = 10;
 
 // Feedback timing constants
 const int FB_SHORT_DURATION_MS = 100;
-const int FB_BLINK_ON_MS = 400;
-const int FB_BLINK_OFF_MS = 400;
-const int FB_BLINK_TOTAL = 5;
+const int FB_WINLOOSE_ON_MS = 400;
+const int FB_WINLOOSE_OFF_MS = 400;
+const int FB_WINLOOSE_TOTAL = 5;
+
+// Pattern complete feedback (longer green blinks)
+const int FB_PATTERN_COMPLETE_ON_MS = 500;
+const int FB_PATTERN_COMPLETE_OFF_MS = 300;
+const int FB_PATTERN_COMPLETE_BLINKS = 2;
+
+// Delay before next pattern starts
+const int TURN_COMPLETE_DELAY_MS = 1500;
 
 // Input timing constants
 const unsigned long INPUT_TIMEOUT_MS = 5000;
@@ -71,12 +79,13 @@ const PlayerConfig players[2] = {
 // Game state machine
 enum GameState
 {
-  INIT,          // Generate pattern, prepare to show
-  SHOW_PATTERN,  // Non-blocking pattern display
-  AWAIT_INPUT,   // Polling for button presses
-  TURN_COMPLETE, // Player succeeded, switch to other player
-  GAME_OVER,     // One player failed, showing feedback
-  RESTART_DELAY  // Waiting 5s before new game
+  INIT,               // Generate pattern, prepare to show
+  SHOW_PATTERN,       // Non-blocking pattern display
+  AWAIT_INPUT,        // Polling for button presses
+  TURN_COMPLETE,      // Player succeeded, showing positive feedback
+  TURN_COMPLETE_DELAY,// Waiting before switching to other player
+  GAME_OVER,          // One player failed, showing feedback
+  RESTART_DELAY       // Waiting 5s before new game
 };
 GameState gameState = INIT;
 
@@ -147,6 +156,7 @@ enum FeedbackType
 {
   FB_NONE,
   FB_SHORT_GREEN,
+  FB_PATTERN_COMPLETE,
   FB_WIN_LOSE_SEQUENCE
 };
 FeedbackType feedbackType = FB_NONE;
@@ -213,6 +223,17 @@ void startShortGreenFlash(int playerIndex)
   sendToAgent(players[playerIndex].i2cAddress, players[playerIndex].greenLED);
 }
 
+// Start pattern complete feedback (longer green blinks)
+void startPatternCompleteFlash(int playerIndex)
+{
+  feedbackType = FB_PATTERN_COMPLETE;
+  feedbackPlayerIndex = playerIndex;
+  feedbackStartTime = millis();
+  feedbackBlinkCount = 0;
+  feedbackLedOn = true;
+  sendToAgent(players[playerIndex].i2cAddress, players[playerIndex].greenLED);
+}
+
 // Start the win/lose blink sequence (non-blocking)
 // Loser gets red blinks, winner (other player) gets green blinks
 void startWinLoseSequence(int loserIndex)
@@ -243,9 +264,37 @@ void updateFeedback()
       feedbackType = FB_NONE;
     }
   }
+  else if (feedbackType == FB_PATTERN_COMPLETE)
+  {
+    int blinkDuration = feedbackLedOn ? FB_PATTERN_COMPLETE_ON_MS : FB_PATTERN_COMPLETE_OFF_MS;
+    if (elapsed >= (unsigned long)blinkDuration)
+    {
+      feedbackStartTime = millis();
+      if (feedbackLedOn)
+      {
+        // Turn off LED
+        sendToAgent(players[feedbackPlayerIndex].i2cAddress, MSG_STOP);
+        feedbackLedOn = false;
+        feedbackBlinkCount++;
+      }
+      else
+      {
+        if (feedbackBlinkCount >= FB_PATTERN_COMPLETE_BLINKS)
+        {
+          feedbackType = FB_NONE;
+        }
+        else
+        {
+          // Turn on LED again
+          sendToAgent(players[feedbackPlayerIndex].i2cAddress, players[feedbackPlayerIndex].greenLED);
+          feedbackLedOn = true;
+        }
+      }
+    }
+  }
   else if (feedbackType == FB_WIN_LOSE_SEQUENCE)
   {
-    int blinkDuration = feedbackLedOn ? FB_BLINK_ON_MS : FB_BLINK_OFF_MS;
+    int blinkDuration = feedbackLedOn ? FB_WINLOOSE_ON_MS : FB_WINLOOSE_OFF_MS;
     if (elapsed >= (unsigned long)blinkDuration)
     {
       feedbackStartTime = millis();
@@ -258,7 +307,7 @@ void updateFeedback()
       else
       {
         feedbackBlinkCount++;
-        if (feedbackBlinkCount >= FB_BLINK_TOTAL)
+        if (feedbackBlinkCount >= FB_WINLOOSE_TOTAL)
         {
           feedbackType = FB_NONE;
         }
@@ -480,6 +529,7 @@ void loop()
       webSerial.print(currentPlayer == 0 ? "A" : "B");
       webSerial.println(" completed pattern successfully!");
       playerCompletedThisRound[currentPlayer] = true;
+      startPatternCompleteFlash(currentPlayer);
       gameState = TURN_COMPLETE;
     }
     else if (result == POLL_WRONG || result == POLL_TIMEOUT)
@@ -495,21 +545,34 @@ void loop()
   }
 
   case TURN_COMPLETE:
-    // Switch to other player
-    currentPlayer = 1 - currentPlayer;
-
-    // Check if round complete (both players succeeded)
-    if (playerCompletedThisRound[0] && playerCompletedThisRound[1])
+    // Wait for pattern complete feedback to finish
+    if (feedbackType == FB_NONE)
     {
-      roundNumber++;
-      playerCompletedThisRound[0] = false;
-      playerCompletedThisRound[1] = false;
-      webSerial.print("\n========== ROUND ");
-      webSerial.print(roundNumber);
-      webSerial.println(" ==========");
+      stateStartTime = millis();
+      gameState = TURN_COMPLETE_DELAY;
     }
+    break;
 
-    gameState = INIT;
+  case TURN_COMPLETE_DELAY:
+    // Wait for delay before switching to other player
+    if (millis() - stateStartTime >= TURN_COMPLETE_DELAY_MS)
+    {
+      // Switch to other player
+      currentPlayer = 1 - currentPlayer;
+
+      // Check if round complete (both players succeeded)
+      if (playerCompletedThisRound[0] && playerCompletedThisRound[1])
+      {
+        roundNumber++;
+        playerCompletedThisRound[0] = false;
+        playerCompletedThisRound[1] = false;
+        webSerial.print("\n========== ROUND ");
+        webSerial.print(roundNumber);
+        webSerial.println(" ==========");
+      }
+
+      gameState = INIT;
+    }
     break;
 
   case GAME_OVER:

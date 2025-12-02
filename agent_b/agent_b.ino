@@ -13,12 +13,12 @@ const uint8_t I2C_SELF_ADDRESS = 0x11;
 
 // Actuator/button pairs this agent controls
 ActuSensorator nodes[6] = {
-  {0x07, 13, 5},  // Actuator 0x07 on digi pin 10, button on digi pin 5
-  {0x08, 12, 6},  // Actuator 0x08 on digi pin 11, button on digi pin 6
-  {0x09, 11, 7},  // Actuator 0x09 on digi pin 12, button on digi pin 7
-  {0x0A, 10, 8},  // Actuator 0x0A on digi pin 13, button on digi pin 8
-  {0x0B, A2, -1}, // Actuator 0x0B: Red LED on analog pin A2
-  {0x0C, A3, -1}  // Actuator 0x0C: Green LED on analog pin A3
+  {0x07, 13, 5},
+  {0x08, 12, 6},
+  {0x09, 11, 7},
+  {0x0A, 10, 8},
+  {0x0B, A2, -1},
+  {0x0C, A3, -1}
 };
 
 #include "shared.h"
