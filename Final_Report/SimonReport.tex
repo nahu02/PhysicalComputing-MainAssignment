@@ -226,7 +226,7 @@ used in collaboration with the adjustment pin to set the voltage. The voltage di
 in the datasheet~\cite[][p.25]{ldo}. We'll need to choose one of the resistor values and then calculate the other. Using the examples in the datasheet~\cite[][p.3]{ldo}, we've chosen 
 R2 to have a resistance of 390 ohms. We can then calculate the value of R1 using~\cite[][p.25]{ldo}
 \[
-	R1=R2\left(\frac{V_{supply}}{1.24}-1\right)=390\left(\frac{3.4}{1.24}-1\right)\approx 679
+	R1=R2\left(\frac{V_{out}}{1.24}-1\right)=390\left(\frac{3.4}{1.24}-1\right)\approx 679
 \]
 which is almost exactly 680 ohms. We've therefore chosen this resistor value. The resistors in the circuit diagrams are R1 and R2 in figure~\ref{fig:controller_board_schematic}, 
 with the same names as in the calculations. Note that the datasheet also mentions a minimum load to have the correct output voltage~\cite[][p.25]{ldo}. 
@@ -245,8 +245,23 @@ current limit on the pin where the resistor is located. This is not the case for
 
 \section{Limitations and future work}
 %In the limitations section, identify constraints or drawbacks of your prototype. These could include technical limitations, cost restrictions, or any design choices that may have affected the prototype's performance. Be honest about the areas where improvements or refinements could be made. The future work could outline potential enhancements and extensions for your prototype. Suggest areas where further development or research could lead to more robust solutions. Discuss how your prototype could be applied in different contexts or industries and what additional features or improvements.
-XXXXXX
+One very obvious limitation of the prototype is the manufacturing method. The PCBs could be much more compact and reliable 
+given more modern manufacturing methods. The components themselves could also be smaller, since modern pick and place assembly lines 
+can use SMD components instead of the through-hole components we use for the prototype. The cost-effectiveness of this would,
+however, heavily depend on the scale of product manufacturing. In addition to these points, using ribbon connectors or some similar 
+connector made for the purpose of data transfer and power transfer between the boards would also improve reliability. 
 
+As for the design of the external part of the prototype, we have considered adding one more button for each modality, for a total of six buttons 
+per player. We also wanted to add a sound module to add to the experience using jingles and maybe some audio cues. We did also consider making sound 
+an aspect of the game, but it's a bit unclear at this point, how that might work.
+
+The 3D printed finger rests themselves feel really nice in our opinion, but when the buttons are added to the motor finger rests, it 
+does interfere a bit in an uncomfortable way, which we would want to fix in another iteration of the button design.
+
+For the purposes of the prototype, the box assembly has been great, but we would also want to add hand rests for comfort, and some more decorations
+to enhance the visual appeal of the game. We think the choice of making the box out of wood is perfectly fine though, since the game 
+is meant as an indoor experience, but we might want to look into other methods of manufacturing for more control over the 
+surface geometry of the box for the afformentioned changes.
 
 \section{Conclusion}
 %In the conclusion, reiterate the main contributions and takeaways from your project. Summarize how your prototype addresses the identified problem or challenge. Discuss the broader implications of your work and its relevance in a larger context, such as how it can contribute to the advancement of the field of physical computing.
