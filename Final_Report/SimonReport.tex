@@ -240,6 +240,50 @@ $\frac{3.4}{4.2} \approx 0.81$ in the worst case\footnote{The worst case efficie
 
 \subsection{Firmware}
 
+Our group is made up of 3 Computer Science students - and therefore a clean and well-managed codebase was important to us.
+
+The logic of the game consists of 3 phases:
+\begin{enumerate}
+  \item Controller sends agents one-by-one the IDs to activate, then (after short pause) deactivate
+  \item Controller requests button presses from player agents, checks if correct, sends feedback in a loop
+  \begin{itemize}
+    \item if incorrect, go to (3)
+    \item if correct for all elements of pattern, switch to other player, go to (1)
+  \end{itemize}
+  \item Win/lose state, controller instructs agents on feedback
+\end{enumerate}
+
+The two ATmega328P agents are responsible for turning the components on and off when instructed by the controller. In Phase 2, they listen for button presses, and when requested by the controller, send back which button was pressed last. (They listen only for the rising edge of the button press signal, to avoid multiple readings of the same press.)\\
+The agents share almost all of their code: \texttt{shared.h} contains the code for receiving commands from controller, and turning components off/on. The only difference between the two agent sketches is their own I\textsuperscript{2}C address and which specific pins are connected to which component/button - these are stored in the \texttt{I2C\_SELF\_ADDRESS}, and \texttt{nodes} constants respectively. \\
+Setting up the Arduino IDE to allow this sharing of code between them was rather cumbersome, as different sketches cannot easily share a header file unless it is defined as a library on a user level. This would have made source control complicated. The solution we found instead, was to have the header file symlinked to both agent sketches. The link is not tracked by version control - only the original header file in a directory of its own outside the 2 sketches.
+
+The controller is the ESP32: this handles all logic on the scale of individually addressing components to turn them on and off. It works with global IDs assigned to actuator–button pairs, and does not know specific Atmega pins, only which agent a given ID belongs to.\\
+In our initial design, both players would have had 2 agents, but we ended up scaling back from this. However, by then we have already set up broadcasting, which would have let the controller not keep track of which agent is which, just which agent belongs to which player. The broadcasting functionality is still present in the codebase and still used in the feedback, where both status LEDs are instructed to stop blinking at the same time.
+
+The game logic is set up as a state machine, illustrated in figure~\ref{fig:state_machine}. The game states are separate from the feedback states, which are used to control the status LEDs. This separation allows for non-blocking feedback - for example, the status LEDs can blink while the game is waiting for user input. This also requires never using \texttt{delay()} in the code, instead relying on \texttt{millis()} to keep track of time.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=1\linewidth]{figure/state_machine.png}
+  \caption{State machine diagram of the game logic, created with PlantUML.}
+  \label{fig:state_machine}
+\end{figure}
+
+
+The gameplay consists of ``turns'' (one pattern then corresponding feedback for one player) of increasing ``difficulty''. Difficulty increases after each ``round'' (after each player had a turn), so the two turns are the same difficulty. (Of course some patterns of the same difficulty according to our generator may feel easier or harder - this will always be the case.)\\
+The time taken for each turn does not increase much, but increasing difficulty does:
+\begin{itemize}
+  \item shorten the time for which an actuator is activated
+  \item shorten the time between different actuator activations
+  \item increase the number of elements in a pattern
+\end{itemize}
+
+Given more time, we could run experiments with users to find the difficulty scaling curve that feels best. The current function ``feels good'' to us, but it's not backed up by any evidence.
+
+On another note, using the ESP32 gave us the possibility of wireless debugging! The ESP runs a simple web server that serves a page with Serial out. This uses the ESP's WiFi capabilities and the MycilaWebSerial lib. The whole thing can be disabled at compile time via a \texttt{\#define}, to avoid the extra power draw.
+This proved very useful during development, as we could see Serial output without needing to connect the ESP to a computer via USB. The WiFi capabilities could also be a basis of future work, as mentioned in section~\ref{sec_component_esp32}.
+
+
 \subsection{Electronics Calculations}
 \subsubsection{Sequence LEDs}
 As mentioned in section~\ref{sec_component_led}, we'll assume a forward voltage of 2V, and we'll target a current at about 20mA. The LEDs are on the 3.7V power rail.

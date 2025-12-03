@@ -1,0 +1,34 @@
+@startuml
+
+INIT : Game state setup (eg. active plyer),
+INIT : pattern generated according to difficulty.
+SHOW_PATTERN : Next element of pattern shown
+SHOW_PATTERN : or waiting until it shoulgameState = d be shown
+AWAIT_INPUT : Poll agents for button presses and when
+AWAIT_INPUT : one is received, check if complete or not
+AWAIT_INPUT : and toggle corresponding feedback
+TURN_COMPLETE : Active player successfully
+TURN_COMPLETE : completed played back their buttons.
+TURN_COMPLETE_DELAY : Short delay wait after a completed turn.
+TURN_COMPLETE_DELAY : Switch active player, update difficulty.
+GAME_OVER : The active player lost.
+GAME_OVER : Feedback is given to players.
+RESTART_DELAY : Short delay before restarting; resetting
+RESTART_DELAY : variables, switching starting player.
+
+[*] -right->  INIT : start
+INIT --> SHOW_PATTERN : show pattern for active player
+SHOW_PATTERN --> SHOW_PATTERN : not all of the pattern has been displayed 
+SHOW_PATTERN --> AWAIT_INPUT : all of pattern has been displayed
+AWAIT_INPUT --> AWAIT_INPUT : player got one element right
+AWAIT_INPUT --> TURN_COMPLETE : player got all elements right
+AWAIT_INPUT --> GAME_OVER : player messed up
+TURN_COMPLETE --> TURN_COMPLETE_DELAY : wait before starting new round
+TURN_COMPLETE_DELAY --> TURN_COMPLETE_DELAY : delay not done yet
+TURN_COMPLETE_DELAY --> INIT : start next turn
+GAME_OVER --> GAME_OVER : blinking not done
+RESTART_DELAY  --> RESTART_DELAY : delay not done
+GAME_OVER --> RESTART_DELAY : wait before restarting
+RESTART_DELAY --> INIT : restart game
+
+@enduml
