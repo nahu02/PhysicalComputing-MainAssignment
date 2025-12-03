@@ -1,0 +1,11 @@
+right
+19 w ESP
+11 w/o ESP
+34 LED
+28 MOTOR
+
+LEFT
+3.6 idle
+43 MOTOR
+LED did nothing
+ESP did nothing
