@@ -86,6 +86,41 @@ XXXXXX
 XXXXXX
 
 
+\subsubsection{3D Prototyping}
+
+\paragraph{Embedded Button Caps}
+The introduction of these parts played an important role in arriving at the user interface that we had in mind. By integrating actuators (vibrating motors and LEDs) with sensors (push buttons) into self-contained elements, we get a setting that intuitively bridges input and output, streamlining user experience.
+
+We utilized an existing model of a push button cap from \textit{Printables}\cite{tactile_switch_cap_12x12} in order to get the right dimensions for the base connecting to the button. Next a bigger cap, accommodating the dimensions of LEDs and vibrating motors was constructed on top of it. Actuators were placed into the print midway and sealed completely, leaving only the connector points protruding from the sides.
+
+Prototyping process took two iterations. For the final version we introduced smoother curves, consistent sizing between the two button types and picked flexible TPU filament as a material of choice to further improve tactile user experience.
+
+
+\paragraph{Finger Rests}
+
+These modules serve the purpose of holding push-buttons with custom key caps in place. They are embedded into the surface of the box enclosure and work together with its geometry, using it as palm rests.
+
+Through the introduction of grooves accommodating fingers' shape and placement of the holes for button key caps we aimed at an ergonomic design, that will support an intuitive use of the product.
+
+
+\paragraph{Players' ``Avatars''}
+
+We opted for a ``space'' theme as a graphic aesthetic for the final product. This lead to the idea of choosing UFO flying saucer figurines as players' avatars. Yet again we borrowed a design from \textit{Printables}~\cite{alien_ufo_alext_2024}.
+
+We modified it by scaling it down and introducing a cutout at the base of the saucer's beam, to accommodate the status indication RGB LED.
+
+
+\subsubsection{Enclosure}
+
+All of the components are enclosed into a $400mm \times 300mm \times 80mm$ box.
+
+We used \textit{MakerCase}~\cite{makercase_basicBox} website to generate design that is easy to assemble thanks to box finger joints. Design was altered in Fusion 360 to introduce cutouts in the top lid, where 3D-printed modules holding the buttons and status indication RGB LEDs were to be placed.
+
+First iteration of the box was cut out from cardboard for fast and cheap prototype and assembled with the help of duct tape. We test-fit the components and introduced necessary adjustments.
+
+Second iteration featured smaller finger finger joints for easier assembly and cutouts for the power switch and charging port. It was also the final version, which we cut out with laser from a 6mm MDF board.
+
+
 \section{Main Components} %% I really don't know if this is a good name? Maybe ask on Tuesday.
 %This section could provide a step-by-step account of how you constructed the prototype. Describe the hardware assembly process, wiring, and connections in detail. Include code snippets and explain the logic and functionality of your software, emphasizing any unique algorithms or coding decisions. Discuss any challenges encountered during the implementation, technical problems faced, and how you overcame them. This section should provide readers with a clear guide on how to replicate your prototype.
 
@@ -185,7 +220,6 @@ to hopefully ensure a better player experience for a wider voltage range. \\[0.5
 $\frac{3.4}{4.2} \approx 0.81$ in the worst case\footnote{The worst case efficiency is a fully charged battery. }.
 
 \subsection{Assembly}
-
 \subsubsection{Box assembly}
 
 \subsubsection{Wiring}
