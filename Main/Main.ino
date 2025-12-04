@@ -151,6 +151,11 @@ bool playerCompletedThisRound[2] = {false, false};
 unsigned long stateStartTime = 0;
 unsigned long lastPollTime = 0;
 
+// Debounce for repeated button presses (hardware issue workaround)
+const unsigned long BUTTON_DEBOUNCE_MS = 130;
+uint8_t lastButtonPressed = 0;
+unsigned long lastButtonPressTime = 0;
+
 // Feedback system (non-blocking)
 enum FeedbackType
 {
@@ -392,6 +397,19 @@ PollResult updateInputPolling()
     // Check if agent reported a button press (non-zero, valid range)
     if (receivedByte > 0x00 && receivedByte <= 0x0F)
     {
+      // Debounce: ignore repeated presses of the same button within 130ms
+      if (receivedByte == lastButtonPressed && 
+          (millis() - lastButtonPressTime) < BUTTON_DEBOUNCE_MS)
+      {
+        webSerial.print("  Ignoring repeated button press: 0x (workaround for hardware doublepress issue) ");
+        webSerial.println(receivedByte, HEX);
+        return POLL_CONTINUE;
+      }
+      
+      // Record this button press for debounce
+      lastButtonPressed = receivedByte;
+      lastButtonPressTime = millis();
+
       webSerial.print("  Button press: 0x");
       webSerial.print(receivedByte, HEX);
       webSerial.print(" (expected: 0x");
@@ -513,6 +531,8 @@ void loop()
       patternIndex = 0;
       stateStartTime = millis();
       lastPollTime = 0;
+      lastButtonPressed = 0;     // Reset debounce state for new input phase
+      lastButtonPressTime = 0;
       gameState = AWAIT_INPUT;
       webSerial.print("=== Player ");
       webSerial.print(currentPlayer == 0 ? "A" : "B");
