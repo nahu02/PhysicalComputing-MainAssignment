@@ -49,6 +49,9 @@ const int FB_PATTERN_COMPLETE_ON_MS = 500;
 const int FB_PATTERN_COMPLETE_OFF_MS = 300;
 const int FB_PATTERN_COMPLETE_BLINKS = 2;
 
+// Input start feedback (both LEDs)
+const int FB_INPUT_START_DURATION_MS = 150;
+
 // Delay before next pattern starts
 const int TURN_COMPLETE_DELAY_MS = 1500;
 
@@ -111,7 +114,7 @@ DifficultyParams getDifficulty(int round)
   DifficultyParams params;
 
   // Increasing pattern length
-  params.patternLength = 3 + min(round, 6);
+  params.patternLength = 3 + min(round, 8);
   // Decreasing actuator active time
   params.actuatorActiveMs = max(1500 - round * 150, 400);
   // Decreasing inter-element delay
@@ -152,7 +155,7 @@ unsigned long stateStartTime = 0;
 unsigned long lastPollTime = 0;
 
 // Debounce for repeated button presses (hardware issue workaround)
-const unsigned long BUTTON_DEBOUNCE_MS = 130;
+const unsigned long BUTTON_DEBOUNCE_MS = 300;
 uint8_t lastButtonPressed = 0;
 unsigned long lastButtonPressTime = 0;
 
@@ -162,7 +165,8 @@ enum FeedbackType
   FB_NONE,
   FB_SHORT_GREEN,
   FB_PATTERN_COMPLETE,
-  FB_WIN_LOSE_SEQUENCE
+  FB_WIN_LOSE_SEQUENCE,
+  FB_INPUT_START
 };
 FeedbackType feedbackType = FB_NONE;
 int feedbackPlayerIndex = 0;
@@ -236,6 +240,18 @@ void startPatternCompleteFlash(int playerIndex)
   feedbackStartTime = millis();
   feedbackBlinkCount = 0;
   feedbackLedOn = true;
+  sendToAgent(players[playerIndex].i2cAddress, players[playerIndex].greenLED);
+}
+
+// Start input start feedback (both red and green LEDs for 150ms)
+void startInputStartFlash(int playerIndex)
+{
+  feedbackType = FB_INPUT_START;
+  feedbackPlayerIndex = playerIndex;
+  feedbackStartTime = millis();
+  feedbackLedOn = true;
+  // Turn on both red and green LEDs for this player
+  sendToAgent(players[playerIndex].i2cAddress, players[playerIndex].redLED);
   sendToAgent(players[playerIndex].i2cAddress, players[playerIndex].greenLED);
 }
 
@@ -324,6 +340,14 @@ void updateFeedback()
           feedbackLedOn = true;
         }
       }
+    }
+  }
+  else if (feedbackType == FB_INPUT_START)
+  {
+    if (elapsed >= FB_INPUT_START_DURATION_MS)
+    {
+      sendToAgent(players[feedbackPlayerIndex].i2cAddress, MSG_STOP);
+      feedbackType = FB_NONE;
     }
   }
 }
@@ -533,6 +557,7 @@ void loop()
       lastPollTime = 0;
       lastButtonPressed = 0;     // Reset debounce state for new input phase
       lastButtonPressTime = 0;
+      startInputStartFlash(currentPlayer); // Flash both LEDs to signal input phase
       gameState = AWAIT_INPUT;
       webSerial.print("=== Player ");
       webSerial.print(currentPlayer == 0 ? "A" : "B");
