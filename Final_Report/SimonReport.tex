@@ -57,7 +57,7 @@ walkthrough of the final assembly of the prototype.
 
 
 \begin{teaserfigure}
-  \includegraphics[width=\textwidth]{figure/sample.png}
+  \includegraphics[width=\textwidth]{figure/teaser.png}
   \caption{XXXXXX}
   \label{fig_XXXXXX}
 \end{teaserfigure}
@@ -133,7 +133,7 @@ We used \textit{MakerCase}~\cite{makercase_basicBox} website to generate design 
 First iteration of the box was cut out from cardboard for fast and cheap prototype and assembled with the help of duct tape. We test-fit the components and introduced necessary adjustments.
 
 Second iteration featured smaller finger finger joints for easier assembly and cutouts for the power switch and charging port. It was also the final version, which we cut out with laser from a 6mm MDF board.
-
+ 
 
 \section{Main Components} %% I really don't know if this is a good name? Maybe ask on Tuesday.
 %This section could provide a step-by-step account of how you constructed the prototype. Describe the hardware assembly process, wiring, and connections in detail. Include code snippets and explain the logic and functionality of your software, emphasizing any unique algorithms or coding decisions. Discuss any challenges encountered during the implementation, technical problems faced, and how you overcame them. This section should provide readers with a clear guide on how to replicate your prototype.
@@ -235,8 +235,24 @@ $\frac{3.4}{4.2} \approx 0.81$ in the worst case\footnote{The worst case efficie
 
 \subsection{Assembly}
 \subsubsection{Box assembly}
+4 out of 6 parts of the box were glued together and all of the joints were treated with wood-filler, consecutively sanded-down to achieve pleasant, smooth edges. Top lid and one of the sides were not fastened permanently, to maintain easy access to the insides of the box. Instead, they are can be firmly snapped into place.
+
+Both the solid part of the box and the free-floating sides were primed and spray-painted black.
+
+\subsubsection{3D-printed parts}
+
+All 4 of the finger rests modules have been primed with spray-filler, followed by a few coats of metallic paints.
+Embedded push-button caps were placed into the holes at the desired heights, together with their respective-push buttons and secured in place from underneath with 3D-printed ``shelves''.
+
 
 \subsubsection{Wiring}
+
+All three PCBs have been secured from the sides against the bottom of the inside of the box with pieces of MDF.
+
+On/Off switch was placed into one of the box-sides, together with the USB-C port for charging.
+
+We positioned all of the finger rests modules into their respective cutouts in the top lid of the box and connected pairs of wires for all of the push-buttons, LEDs and vibration motors to the PCBs via JST connectors.
+
 
 \subsection{Firmware}
 
@@ -701,7 +717,60 @@ XXXXXX
 
 \end{center}
 
+% box
 
+\clearpage
+\begin{center}
+
+  \refstepcounter{figure}
+  \includegraphics[width=\textwidth, keepaspectratio]{figure/prototype-box.jpeg}
+  \captionof{figure}{Top view of the laser-cut (cardboard) first version of the box.}
+\end{center}
+
+\clearpage
+\begin{center}
+
+  \refstepcounter{figure}
+  \includegraphics[width=\textwidth, keepaspectratio]{figure/box-side.jpeg}
+  \captionof{figure}{View of the laser-cut (6mm MDF) side piece of the box.}
+
+  \vspace{1.5em}
+
+  \refstepcounter{figure}
+  \includegraphics[height=0.42\textheight, keepaspectratio]{figure/box-top-lid.jpeg}
+  \captionof{figure}{Top view of the laser-cut (6mm MDF) box lid.}
+
+\end{center}
+
+% wiring
+\clearpage
+\begin{center}
+
+  \refstepcounter{figure}
+  \includegraphics[width=\textwidth, keepaspectratio]{figure/wiring-inside-box.jpeg}
+  \captionof{figure}{Top view of the PCB and wiring layout inside of the open box.}
+
+
+\end{center}
+
+% final box
+
+
+\clearpage
+\begin{center}
+
+  \vspace{5em}
+  \refstepcounter{figure}
+  \includegraphics[width=\textwidth, keepaspectratio]{figure/final-box-side.jpeg}
+  \captionof{figure}{Side view of the assembled product.}
+
+  \vspace{5em}
+
+  \refstepcounter{figure}
+  \includegraphics[width=\textwidth, keepaspectratio]{figure/final-box-angle.jpeg}
+  \captionof{figure}{Angle view of the assembled product.}
+
+\end{center}
 
 \end{document}
 
